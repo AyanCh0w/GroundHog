@@ -1,10 +1,33 @@
 "use client";
 
-import mapboxgl, { Map } from "mapbox-gl";
-import React, { useEffect, useRef } from "react";
-import "mapbox-gl/dist/mapbox-gl.css";
-import { Bar, BarChart } from "recharts";
+// React & core libraries
+import React, { use, useEffect, useRef } from "react";
 
+// Mapbox
+import mapboxgl, { Map } from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+
+// Charts (Recharts & custom chart components)
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
+// UI Components
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,14 +35,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDownIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+// Icons
+import { ChevronDownIcon } from "lucide-react";
+
+// Types & data utilities
+import { ChemicalEstimate } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 import { heatmapConfigs } from "@/components/heatmapConfig";
 import type { FeatureCollection, Feature, Point } from "geojson";
@@ -31,13 +57,32 @@ export default function Dashboard() {
   const [selectedSensor, setSelectedSensor] =
     React.useState<string>("moisture");
   const [roverPoints, setRoverPoints] = React.useState<any[]>([]);
+  const [chemicalData, setChemicalData] =
+    React.useState<null | ChemicalEstimate>();
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
+  const [mapStyle, setMapStyle] = React.useState<string>("standard-satellite");
 
+  // Fetch recent soil chemical analysis
+  useEffect(() => {
+    async function getChemicalData(): Promise<void> {
+      let { data: chemicalData, error } = await supabase
+        .from("chemicalEstimate")
+        .select("*")
+        .eq("farm_id", "usg");
+
+      setChemicalData(chemicalData ? chemicalData[0] : null);
+    }
+
+    getChemicalData();
+  }, []);
+
+  // Fetch farm data to set initial map center
   useEffect(() => {
     async function getFarmData(): Promise<void> {
       let { data: farmData, error } = await supabase
         .from("farmData")
         .select("*")
-        .eq("id", 2);
+        .eq("farm_id", "usg");
 
       if (farmData) {
         setMapCenter([farmData[0].long, farmData[0].lat]);
@@ -51,7 +96,8 @@ export default function Dashboard() {
     async function fetchRoverPoints() {
       let { data: roverpoints, error } = await supabase
         .from("rover-points")
-        .select("*");
+        .select("*")
+        .eq("farm_id", "usg");
       if (roverpoints) setRoverPoints(roverpoints);
     }
     fetchRoverPoints();
@@ -127,28 +173,82 @@ export default function Dashboard() {
     };
   }, [mapCenter, roverPoints, selectedSensor]);
 
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
+  useEffect(() => {
+    mapRef.current!.setStyle("mapbox://styles/mapbox/" + mapStyle);
+  }, [mapStyle]);
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-row w-screen h-[8vh] p-2 bg-emerald-200">
-        <p>Navbar</p>
+      <div className="flex flex-row w-screen h-10 px-6 bg-accent items-center justify-between">
+        <p className=" text-2xl font-medium">Ground Hog</p>
       </div>
 
       <div className="flex flex-row w-screen h-[92vh]">
-        <div className="w-2/5 flex flex-col p-4 bg-white">
-          <p>Sidebar Content</p>
-          <Button
-            onClick={async () => {
-              let { data: roverpoints, error } = await supabase
-                .from("rover-points")
-                .select("*");
-
-              console.log(roverpoints);
-            }}
-          >
-            Hi
-          </Button>
+        <div className="w-2/5 flex flex-col p-4 bg-white gap-4 overflow-y-auto">
+          <div className="flex flex-col p-4">
+            <p className="text-2xl font-bold mb-2">USG Farms</p>
+            <p>
+              Soil pH is balanced at 6.7 with minor acidic spots. EC (1.2 dS/m),
+              moisture (30%), and temperature (22°C) are within optimal ranges.
+              Nitrogen and potassium are sufficient, but phosphorus is slightly
+              low, requiring targeted supplementation.
+            </p>
+          </div>
+          {chemicalData ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Chemical Estimate</CardTitle>
+                <CardDescription>
+                  Nitrogen, Phosphorus & Potassium levels
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{
+                    value: {
+                      label: "Value",
+                      color: "var(--chart-1)",
+                    },
+                  }}
+                >
+                  <BarChart
+                    accessibilityLayer
+                    data={[
+                      { name: "Nitrogen (N)", value: chemicalData.nitrogen },
+                      {
+                        name: "Phosphorus (P)",
+                        value: chemicalData.phosphorus,
+                      },
+                      { name: "Potassium (K)", value: chemicalData.potassium },
+                    ]}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Bar dataKey="value" fill="var(--color-value)" radius={8} />
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+              <CardFooter className="flex-col items-start gap-2 text-sm">
+                <div className="flex gap-2 leading-none font-medium">
+                  Latest chemical estimate from{" "}
+                  {new Date(chemicalData.created_at).toLocaleDateString()}
+                </div>
+              </CardFooter>
+            </Card>
+          ) : (
+            <p className="text-sm text-gray-500">
+              Loading chemical estimate...
+            </p>
+          )}
         </div>
 
         <div className="w-3/5 flex flex-col items-center justify-center">
@@ -158,10 +258,10 @@ export default function Dashboard() {
               className="w-full h-full rounded-2xl overflow-hidden"
             />
 
-            <div className="absolute top-6 left-6 z-10 flex gap-2 items-start">
+            <div className="absolute top-6 left-6 z-10 flex gap-2 items-start p-2 rounded-2xl backdrop-blur-lg outline-1">
               {/* Sensor Dropdown */}
               <Select value={selectedSensor} onValueChange={setSelectedSensor}>
-                <SelectTrigger className="w-[200px] bg-accent">
+                <SelectTrigger className="w-[200px] bg-white">
                   <SelectValue placeholder="Sensor Map Display" />
                 </SelectTrigger>
                 <SelectContent>
@@ -171,8 +271,6 @@ export default function Dashboard() {
                   <SelectItem value="EC">Electrical Conductivity</SelectItem>
                 </SelectContent>
               </Select>
-
-              {/* Calendar Picker */}
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -194,6 +292,15 @@ export default function Dashboard() {
                   />
                 </PopoverContent>
               </Popover>
+              <Select value={mapStyle} onValueChange={setMapStyle}>
+                <SelectTrigger className="w-[200px] bg-white">
+                  <SelectValue placeholder="Map Style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="standard-satellite">Satellite</SelectItem>
+                  <SelectItem value="outdoors-v12">Street</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
