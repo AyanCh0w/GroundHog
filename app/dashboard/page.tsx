@@ -183,7 +183,7 @@ export default function Dashboard() {
         <p className=" text-2xl font-medium">Ground Hog</p>
       </div>
 
-      <div className="flex flex-row w-screen h-[92vh]">
+      <div className="flex flex-row w-screen h-[calc(100vh-40px)]">
         <div className="w-2/5 flex flex-col p-4 bg-white gap-4 overflow-y-auto">
           <div className="flex flex-col p-4">
             <p className="text-2xl font-bold mb-2">USG Farms</p>
