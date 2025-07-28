@@ -59,8 +59,7 @@ export default function Dashboard() {
 
   // Update map and heatmap layer
   useEffect(() => {
-    mapboxgl.accessToken = process.env.MAPBOX_KEY;
-
+    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_KEY;
     if (mapContainerRef.current) {
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
