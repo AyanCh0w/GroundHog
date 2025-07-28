@@ -147,7 +147,7 @@ export default function Dashboard() {
               console.log(roverpoints);
             }}
           >
-            Test
+            Hi
           </Button>
         </div>
 
