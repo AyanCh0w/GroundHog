@@ -42,7 +42,11 @@ import {
 } from "@/components/ui/popover";
 
 // Icons
-import { ChevronDownIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  ArrowLeftToLineIcon,
+  ArrowRightToLineIcon,
+} from "lucide-react";
 
 // Types & data utilities
 import { ChemicalEstimate } from "@/lib/types";
@@ -62,6 +66,7 @@ export default function Dashboard() {
     React.useState<null | ChemicalEstimate>();
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [mapStyle, setMapStyle] = React.useState<string>("standard-satellite");
+  const [largeMap, setLargeMap] = React.useState<String>("2/5");
 
   // Fetch recent soil chemical analysis
   useEffect(() => {
@@ -187,7 +192,9 @@ export default function Dashboard() {
       </div>
 
       <div className="flex flex-row w-screen h-[calc(100vh-40px)]">
-        <div className="w-2/5 flex flex-col p-4 bg-white gap-4 overflow-y-auto">
+        <div
+          className={`w-${largeMap} flex flex-col p-4 bg-white gap-4 overflow-y-auto`}
+        >
           <div className="flex flex-col p-4">
             <p className="text-2xl font-bold mb-2">USG Farms</p>
             <p>
@@ -234,7 +241,12 @@ export default function Dashboard() {
                     <div className="text-3xl font-bold text-red-600">
                       {chemicalData.ec}
                     </div>
-                    <div className="text-sm text-gray-600">dS/m</div>
+                    <div
+                      className="text-sm text-gray-60
+                    0"
+                    >
+                      dS/m
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -385,7 +397,7 @@ export default function Dashboard() {
           {/* Single Value Charts - Horizontal Layout */}
         </div>
 
-        <div className="w-3/5 flex flex-col items-center justify-center">
+        <div className={"w-3/5 flex flex-col items-center justify-center"}>
           <div className="relative w-full h-full p-4">
             <div
               ref={mapContainerRef}
@@ -394,6 +406,18 @@ export default function Dashboard() {
 
             <div className="absolute top-6 left-6 z-10 flex gap-2 items-start p-2 rounded-2xl backdrop-blur-lg outline-1">
               {/* Sensor Dropdown */}
+              <Button
+                variant={"outline"}
+                onClick={() => {
+                  setLargeMap(largeMap === "3/5" ? "2/5" : "3/5");
+                }}
+              >
+                {largeMap === "3/5" ? (
+                  <ArrowLeftToLineIcon />
+                ) : (
+                  <ArrowRightToLineIcon />
+                )}
+              </Button>
               <Select value={selectedSensor} onValueChange={setSelectedSensor}>
                 <SelectTrigger className="w-[200px] bg-white">
                   <SelectValue placeholder="Sensor Map Display" />
