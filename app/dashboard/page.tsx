@@ -54,12 +54,10 @@ import { ChemicalEstimate } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 import { heatmapConfigs } from "@/components/heatmapConfig";
 import type { FeatureCollection, Feature, Point } from "geojson";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
-  const [mapCenter, setMapCenter] = React.useState<[number, number]>([0, 0]);
   const [selectedSensor, setSelectedSensor] =
     React.useState<string>("moisture");
   const [roverPoints, setRoverPoints] = React.useState<any[]>([]);
@@ -68,6 +66,11 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [mapStyle, setMapStyle] = React.useState<string>("standard-satellite");
   const [largeMap, setLargeMap] = React.useState<String>("2/5");
+
+  const [farmName, setFarmName] = React.useState<string>("");
+  const [farmerName, setFarmerName] = React.useState<string>("");
+  const [farmID, setFarmID] = React.useState<string>("");
+  const [mapCenter, setMapCenter] = React.useState<[number, number]>([0, 0]);
 
   // Fetch recent soil chemical analysis
   useEffect(() => {
@@ -93,6 +96,8 @@ export default function Dashboard() {
 
       if (farmData) {
         setMapCenter([farmData[0].long, farmData[0].lat]);
+        setFarmName(farmData[0].farm_name);
+        setFarmerName(farmData[0].farmer_name);
       }
     }
     getFarmData();
@@ -197,7 +202,8 @@ export default function Dashboard() {
           className={`w-${largeMap} flex flex-col p-4 bg-white gap-4 overflow-y-scroll `}
         >
           <div className="flex flex-col p-4">
-            <p className="text-2xl font-bold mb-2">USG Farms</p>
+            <p className="text-sm text-gray-600">Hi {farmerName}</p>
+            <p className="text-2xl font-bold mb-2">{farmName}</p>
             <p>
               Soil pH is balanced at 6.7 with minor acidic spots. EC (1.2 dS/m),
               moisture (30%), and temperature (22°C) are within optimal ranges.
@@ -205,197 +211,213 @@ export default function Dashboard() {
               low, requiring targeted supplementation.
             </p>
           </div>
-          <div className="flex gap-4">
-            {/* Percentage - Secondary Macronutrients */}
-            {chemicalData ? (
-              <Card className="flex-1">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    Sulphur (S)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-600">
-                      {chemicalData.sulphur}
+          {/* Soil Analysis */}
+          <div>
+            <div className="flex gap-4">
+              {/* Percentage - Secondary Macronutrients */}
+              {chemicalData ? (
+                <Card className="flex-1">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      Sulphur (S)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600">
+                        {chemicalData.sulphur}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Percentage (%)
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600">Percentage (%)</div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="flex-1">
-                <Loader size={40} className="m-auto animate-spin" />
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="flex-1">
+                  <Loader size={40} className="m-auto animate-spin" />
+                </Card>
+              )}
 
-            {/* dS/m - Electrical Conductivity */}
-            {chemicalData ? (
-              <Card className="flex-1">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    Electrical Conductivity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-red-600">
-                      {chemicalData.ec}
-                    </div>
-                    <div
-                      className="text-sm text-gray-60
+              {/* dS/m - Electrical Conductivity */}
+              {chemicalData ? (
+                <Card className="flex-1">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      Electrical Conductivity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-red-600">
+                        {chemicalData.ec}
+                      </div>
+                      <div
+                        className="text-sm text-gray-60
                     0"
-                    >
-                      dS/m
+                      >
+                        dS/m
+                      </div>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="flex-1">
+                  <Loader size={40} className="m-auto animate-spin" />
+                </Card>
+              )}
+
+              {/* pH - Soil Acidity/Alkalinity */}
+              {chemicalData ? (
+                <Card className="flex-1">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      Soil acidity/alkalinity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-yellow-600">
+                        {chemicalData.ph}
+                      </div>
+                      <div className="text-sm text-gray-600">pH</div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="flex-1">
+                  <Loader size={40} className="m-auto animate-spin" />
+                </Card>
+              )}
+            </div>
+            {chemicalData ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    Macronutrients
+                  </CardTitle>
+                  <CardDescription>
+                    Kilograms per Hectare (Kg/Ha)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer
+                    config={{
+                      value: {
+                        label: "Value",
+                        color: "var(--chart-1)",
+                      },
+                    }}
+                  >
+                    <BarChart
+                      accessibilityLayer
+                      data={[
+                        { name: "Nitrogen (N)", value: chemicalData.nitrogen },
+                        {
+                          name: "Phosphorus (P)",
+                          value: chemicalData.phosphorus,
+                        },
+                        {
+                          name: "Potassium (K)",
+                          value: chemicalData.potassium,
+                        },
+                      ]}
+                      width={400}
+                      height={200}
+                    >
+                      <CartesianGrid vertical={false} />
+                      <XAxis
+                        dataKey="name"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        dataKey="value"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                      />
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent />}
+                      />
+                      <Bar
+                        dataKey="value"
+                        fill="var(--color-value)"
+                        radius={8}
+                      />
+                    </BarChart>
+                  </ChartContainer>
                 </CardContent>
               </Card>
             ) : (
               <Card className="flex-1">
-                <Loader size={40} className="m-auto animate-spin" />
+                <Loader size={80} className="m-auto animate-spin" />
               </Card>
             )}
 
-            {/* pH - Soil Acidity/Alkalinity */}
+            {/* PPM - Micronutrients */}
             {chemicalData ? (
-              <Card className="flex-1">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    Soil acidity/alkalinity
+                  <CardTitle className="flex items-center gap-2">
+                    Macronutrients
                   </CardTitle>
+                  <CardDescription>Parts Per Million (PPM)</CardDescription>
                 </CardHeader>
-                <CardContent className="flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-yellow-600">
-                      {chemicalData.ph}
-                    </div>
-                    <div className="text-sm text-gray-600">pH</div>
-                  </div>
+                <CardContent>
+                  <ChartContainer
+                    config={{
+                      value: {
+                        label: "Value",
+                        color: "var(--chart-1)",
+                      },
+                    }}
+                  >
+                    <BarChart
+                      accessibilityLayer
+                      data={[
+                        { name: "Copper (Cu)", value: chemicalData.copper },
+                        { name: "Iron (Fe)", value: chemicalData.iron },
+                        { name: "Zinc (Zn)", value: chemicalData.zinc },
+                        { name: "Boron (B)", value: chemicalData.boron },
+                      ]}
+                      width={400}
+                      height={200}
+                    >
+                      <CartesianGrid vertical={false} />
+                      <XAxis
+                        dataKey="name"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        dataKey="value"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                      />
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent />}
+                      />
+                      <Bar
+                        dataKey="value"
+                        fill="var(--color-value)"
+                        radius={8}
+                      />
+                    </BarChart>
+                  </ChartContainer>
                 </CardContent>
               </Card>
             ) : (
               <Card className="flex-1">
-                <Loader size={40} className="m-auto animate-spin" />
+                <Loader size={80} className="m-auto animate-spin" />
               </Card>
             )}
           </div>
-          {chemicalData ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Macronutrients
-                </CardTitle>
-                <CardDescription>Kilograms per Hectare (Kg/Ha)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    value: {
-                      label: "Value",
-                      color: "var(--chart-1)",
-                    },
-                  }}
-                >
-                  <BarChart
-                    accessibilityLayer
-                    data={[
-                      { name: "Nitrogen (N)", value: chemicalData.nitrogen },
-                      {
-                        name: "Phosphorus (P)",
-                        value: chemicalData.phosphorus,
-                      },
-                      { name: "Potassium (K)", value: chemicalData.potassium },
-                    ]}
-                    width={400}
-                    height={200}
-                  >
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="name"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      dataKey="value"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent />}
-                    />
-                    <Bar dataKey="value" fill="var(--color-value)" radius={8} />
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="flex-1">
-              <Loader size={80} className="m-auto animate-spin" />
-            </Card>
-          )}
-
-          {/* PPM - Micronutrients */}
-          {chemicalData ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Macronutrients
-                </CardTitle>
-                <CardDescription>Parts Per Million (PPM)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    value: {
-                      label: "Value",
-                      color: "var(--chart-1)",
-                    },
-                  }}
-                >
-                  <BarChart
-                    accessibilityLayer
-                    data={[
-                      { name: "Copper (Cu)", value: chemicalData.copper },
-                      { name: "Iron (Fe)", value: chemicalData.iron },
-                      { name: "Zinc (Zn)", value: chemicalData.zinc },
-                      { name: "Boron (B)", value: chemicalData.boron },
-                    ]}
-                    width={400}
-                    height={200}
-                  >
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="name"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      dataKey="value"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent />}
-                    />
-                    <Bar dataKey="value" fill="var(--color-value)" radius={8} />
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="flex-1">
-              <Loader size={80} className="m-auto animate-spin" />
-            </Card>
-          )}
-
-          {/* Single Value Charts - Horizontal Layout */}
         </div>
 
         <div className={"w-3/5 flex flex-col items-center justify-center"}>
