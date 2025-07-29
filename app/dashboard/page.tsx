@@ -454,13 +454,13 @@ export default function Dashboard() {
               <Button
                 variant={"outline"}
                 onClick={() => {
-                  setLargeMap(largeMap === "3/5" ? "2/5" : "3/5");
+                  setLargeMap(largeMap === "2/5" ? "4/5" : "2/5");
                 }}
               >
-                {largeMap === "3/5" ? (
-                  <ArrowLeftToLineIcon />
-                ) : (
+                {largeMap === "2/5" ? (
                   <ArrowRightToLineIcon />
+                ) : (
+                  <ArrowLeftToLineIcon />
                 )}
               </Button>
               <Select value={selectedSensor} onValueChange={setSelectedSensor}>
