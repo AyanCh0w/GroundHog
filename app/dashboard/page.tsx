@@ -117,7 +117,12 @@ export default function Dashboard() {
 
       // Add marker for farm center
       new mapboxgl.Marker().setLngLat(mapCenter).addTo(mapRef.current!);
-      const nav = new mapboxgl.NavigationControl({ visualizePitch: true });
+
+      // Add navigation control
+      const nav = new mapboxgl.NavigationControl({
+        visualizePitch: true,
+        showZoom: true,
+      });
       mapRef.current.addControl(nav, "bottom-right");
 
       mapRef.current.on("load", () => {
@@ -148,22 +153,19 @@ export default function Dashboard() {
         // Add heatmap layer
         const config =
           heatmapConfigs[selectedSensor as keyof typeof heatmapConfigs];
-        mapRef.current!.addLayer(
-          {
-            id: "rover-heatmap",
-            type: "heatmap",
-            source: "rover-points",
-            maxzoom: 22,
-            paint: {
-              "heatmap-weight": config.weight as any,
-              "heatmap-intensity": config.intensity as any,
-              "heatmap-color": config.color as any,
-              "heatmap-radius": config.radius as any,
-              "heatmap-opacity": config.opacity as any,
-            },
+        mapRef.current!.addLayer({
+          id: "rover-heatmap",
+          type: "heatmap",
+          source: "rover-points",
+          maxzoom: 22,
+          paint: {
+            "heatmap-weight": config.weight as any,
+            "heatmap-intensity": config.intensity as any,
+            "heatmap-color": config.color as any,
+            "heatmap-radius": config.radius as any,
+            "heatmap-opacity": config.opacity as any,
           },
-          "waterway-label"
-        );
+        });
         mapRef.current!.on("click", (e) => {
           console.log("Clicked location:", e.lngLat);
         });
