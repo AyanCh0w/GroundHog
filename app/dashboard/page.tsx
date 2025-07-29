@@ -194,14 +194,6 @@ export default function Dashboard() {
               Nitrogen and potassium are sufficient, but phosphorus is slightly
               low, requiring targeted supplementation.
             </p>
-            <Button
-              onClick={() => {
-                console.log(chemicalData);
-                console.log(roverPoints);
-              }}
-            >
-              test
-            </Button>
           </div>
           <div className="flex gap-4">
             {/* Percentage - Secondary Macronutrients */}
