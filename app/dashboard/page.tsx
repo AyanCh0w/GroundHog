@@ -2,6 +2,7 @@
 
 // React & core libraries
 import React, { use, useEffect, useRef } from "react";
+import Cookies from "js-cookie";
 
 // Mapbox
 import mapboxgl, { Map } from "mapbox-gl";
@@ -69,11 +70,15 @@ export default function Dashboard() {
 
   const [farmName, setFarmName] = React.useState<string>("");
   const [farmerName, setFarmerName] = React.useState<string>("");
-  const [farmID, setFarmID] = React.useState<string>("usg_farms");
+  const [farmID, setFarmID] = React.useState<string | undefined>(undefined);
   const [mapCenter, setMapCenter] = React.useState<[number, number]>([0, 0]);
+
+  const [roverPointsDebug, setRoverPointsDebug] = React.useState<string>("");
 
   // Fetch recent soil chemical analysis
   useEffect(() => {
+    if (!farmID) return;
+
     async function getChemicalData(): Promise<void> {
       let { data: chemicalData, error } = await supabase
         .from("chemicalEstimate")
@@ -84,10 +89,19 @@ export default function Dashboard() {
     }
 
     getChemicalData();
+  }, [farmID]);
+
+  // Set farm ID from cookie
+  useEffect(() => {
+    const farmIdFromCookie = Cookies.get("farm_id");
+    setFarmID(farmIdFromCookie);
   }, []);
 
-  // Fetch farm data to set initial map center
+  // Fetch farm data when farmID changes
   useEffect(() => {
+    if (!farmID) return;
+
+    console.log("Using farm ID:", farmID);
     async function getFarmData(): Promise<void> {
       let { data: farmData, error } = await supabase
         .from("farmData")
@@ -101,7 +115,7 @@ export default function Dashboard() {
       }
     }
     getFarmData();
-  }, []);
+  }, [farmID]);
 
   // Fetch rover points when sensor changes
   useEffect(() => {
@@ -109,7 +123,7 @@ export default function Dashboard() {
       let { data: roverpoints, error } = await supabase
         .from("rover-points")
         .select("*")
-        .eq("farm_id", "usg");
+        .eq("farm_id", farmID);
       if (roverpoints) setRoverPoints(roverpoints);
     }
     fetchRoverPoints();
@@ -386,10 +400,26 @@ export default function Dashboard() {
               </Card>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full">
+            <div className="flex flex-col items-center justify-center h-full gap-4">
               <p className="text-2xl font-bold">No data available</p>
               <p className="text-sm text-gray-600">
-                Please wait while we fetch the data
+                After you use the rover, the data will eventually show up here.
+              </p>
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  setRoverPointsDebug("Fetching...");
+                  let { data: roverpoints, error } = await supabase
+                    .from("rover-points")
+                    .select("*")
+                    .eq("farm_id", farmID);
+                  setRoverPointsDebug(JSON.stringify(roverpoints));
+                }}
+              >
+                [Debug] Fetch Rover Points
+              </Button>
+              <p className="text-sm text-gray-600 font-mono">
+                {roverPointsDebug == "[ ]" ? roverPointsDebug : "No data"}
               </p>
             </div>
           )}

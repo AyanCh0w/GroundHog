@@ -1,5 +1,6 @@
 "use client";
 
+import Cookies from "js-cookie";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import mapboxgl from "mapbox-gl";
@@ -151,6 +152,13 @@ export default function OnboardPage() {
       }
 
       // Redirect to dashboard after successful creation
+      Cookies.set(
+        "farm_id",
+        farmData.farmName.toLowerCase().replace(/ /g, "_"),
+        {
+          expires: 7,
+        }
+      );
       router.push("/dashboard");
     } catch (err) {
       console.error("Error creating farm:", err);
