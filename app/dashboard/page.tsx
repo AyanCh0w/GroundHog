@@ -67,7 +67,7 @@ export default function Dashboard() {
     React.useState<null | ChemicalEstimate>();
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [mapStyle, setMapStyle] = React.useState<string>("standard-satellite");
-  const [largeMap, setLargeMap] = React.useState<String>("2/5");
+  const [largeMap, setLargeMap] = React.useState<string>("w-2/5");
 
   const [farmName, setFarmName] = React.useState<string>("");
   const [farmerName, setFarmerName] = React.useState<string>("");
@@ -210,7 +210,7 @@ export default function Dashboard() {
     <div className="flex flex-col">
       <div className="flex flex-row w-screen h-screen">
         <div
-          className={`w-${largeMap} flex flex-col p-4 bg-white gap-4 overflow-y-scroll `}
+          className={`${largeMap} flex flex-col p-4 bg-white gap-4 overflow-y-scroll `}
         >
           <div className="flex flex-col p-4">
             <p className="text-sm text-gray-600">{farmerName}</p>
@@ -454,10 +454,11 @@ export default function Dashboard() {
               <Button
                 variant={"outline"}
                 onClick={() => {
-                  setLargeMap(largeMap === "2/5" ? "4/5" : "2/5");
+                  setLargeMap(largeMap === "w-2/5" ? "w-4/5" : "w-2/5");
+                  console.log(largeMap);
                 }}
               >
-                {largeMap === "2/5" ? (
+                {largeMap === "w-2/5" ? (
                   <ArrowRightToLineIcon />
                 ) : (
                   <ArrowLeftToLineIcon />
