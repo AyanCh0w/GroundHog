@@ -48,6 +48,7 @@ import {
   ArrowLeftToLineIcon,
   ArrowRightToLineIcon,
   Loader,
+  RefreshCcwIcon,
 } from "lucide-react";
 
 // Types & data utilities
@@ -225,6 +226,10 @@ export default function Dashboard() {
 
           {chemicalData ? (
             <div className="flex flex-col gap-4">
+              <div className="flex flex-row justify-center gap-4 font-medium font-mono text-sm">
+                Last updated:
+                {new Date(chemicalData?.created_at || "").toLocaleString()}
+              </div>
               <div className="flex flex-row gap-4">
                 {/* Percentage - Secondary Macronutrients */}
                 <Card className="flex-1">
