@@ -67,7 +67,7 @@ export default function Dashboard() {
     React.useState<null | ChemicalEstimate>();
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [mapStyle, setMapStyle] = React.useState<string>("standard-satellite");
-  const [largeMap, setLargeMap] = React.useState<String>("2/5");
+  const [largeMap, setLargeMap] = React.useState<String>("3/5");
 
   const [farmName, setFarmName] = React.useState<string>("");
   const [farmerName, setFarmerName] = React.useState<string>("");
@@ -208,7 +208,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-row w-screen h-screen bg-gradient-to-br from-green-50 to-white">
+      <div className="flex flex-row w-screen h-screen">
         <div
           className={`w-${largeMap} flex flex-col p-4 bg-white gap-4 overflow-y-scroll `}
         >
@@ -226,9 +226,22 @@ export default function Dashboard() {
 
           {chemicalData ? (
             <div className="flex flex-col gap-4">
-              <div className="flex flex-row justify-center gap-4 font-medium font-mono text-sm">
-                Last updated:
-                {new Date(chemicalData?.created_at || "").toLocaleString()}
+              <div className="flex flex-col">
+                <div className="flex flex-row justify-center gap-4 font-medium font-mono text-sm">
+                  Latest Chemical Analysis:&nbsp;
+                  {new Date(chemicalData?.created_at || "")
+                    .toDateString()
+                    .slice(4)}
+                </div>
+                <div className="flex flex-row justify-center gap-4 font-medium font-mono text-sm">
+                  {roverPoints.length > 0
+                    ? "Latest Rover Input:"
+                    : "No Rover Data Input"}
+                  {roverPoints.length > 0 &&
+                    new Date(roverPoints[0]?.created_at || "")
+                      .toDateString()
+                      .slice(4)}
+                </div>
               </div>
               <div className="flex flex-row gap-4">
                 {/* Percentage - Secondary Macronutrients */}
