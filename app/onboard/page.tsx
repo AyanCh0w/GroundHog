@@ -179,7 +179,7 @@ export default function OnboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
         {/* Progress Steps */}
         <div className="mb-8">
@@ -316,6 +316,10 @@ export default function OnboardPage() {
                       <span className="font-medium">Location:</span>{" "}
                       {farmData.latitude.toFixed(6)},{" "}
                       {farmData.longitude.toFixed(6)}
+                    </p>
+                    <p>
+                      <span className="font-medium">Farm ID:</span>{" "}
+                      {farmData.farmName.toLowerCase().replace(/ /g, "_")}
                     </p>
                   </div>
                 </div>

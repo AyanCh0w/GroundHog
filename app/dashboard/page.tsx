@@ -208,7 +208,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-row w-screen h-screen">
+      <div className="flex flex-row w-screen h-screen bg-gradient-to-br from-green-50 to-white">
         <div
           className={`w-${largeMap} flex flex-col p-4 bg-white gap-4 overflow-y-scroll `}
         >
