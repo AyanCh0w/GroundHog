@@ -1,5 +1,6 @@
 export interface FarmLocation {
   id: number;
+  farm_id: string;
   farm_name: string;
   farmer_name: string;
   created_at: string; // or `Date` if you'll parse it

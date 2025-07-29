@@ -69,7 +69,7 @@ export default function Dashboard() {
 
   const [farmName, setFarmName] = React.useState<string>("");
   const [farmerName, setFarmerName] = React.useState<string>("");
-  const [farmID, setFarmID] = React.useState<string>("");
+  const [farmID, setFarmID] = React.useState<string>("usg_farms");
   const [mapCenter, setMapCenter] = React.useState<[number, number]>([0, 0]);
 
   // Fetch recent soil chemical analysis
@@ -78,7 +78,7 @@ export default function Dashboard() {
       let { data: chemicalData, error } = await supabase
         .from("chemicalEstimate")
         .select("*")
-        .eq("farm_id", "usg");
+        .eq("farm_id", farmID);
 
       setChemicalData(chemicalData ? chemicalData[1] : null);
     }
@@ -92,7 +92,7 @@ export default function Dashboard() {
       let { data: farmData, error } = await supabase
         .from("farmData")
         .select("*")
-        .eq("farm_id", "usg");
+        .eq("farm_id", farmID);
 
       if (farmData) {
         setMapCenter([farmData[0].long, farmData[0].lat]);
@@ -193,16 +193,12 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-row w-screen h-10 px-6 bg-accent items-center justify-between">
-        <p className=" text-2xl font-medium">Ground Hog</p>
-      </div>
-
-      <div className="flex flex-row w-screen h-[calc(100vh-40px)]">
+      <div className="flex flex-row w-screen h-screen">
         <div
           className={`w-${largeMap} flex flex-col p-4 bg-white gap-4 overflow-y-scroll `}
         >
           <div className="flex flex-col p-4">
-            <p className="text-sm text-gray-600">Hi {farmerName}</p>
+            <p className="text-sm text-gray-600">{farmerName}</p>
             <p className="text-2xl font-bold mb-2">{farmName}</p>
             <p>
               Soil pH is balanced at 6.7 with minor acidic spots. EC (1.2 dS/m),
@@ -212,10 +208,11 @@ export default function Dashboard() {
             </p>
           </div>
           {/* Soil Analysis */}
-          <div>
-            <div className="flex gap-4">
-              {/* Percentage - Secondary Macronutrients */}
-              {chemicalData ? (
+
+          {chemicalData ? (
+            <div>
+              <div className="flex gap-4">
+                {/* Percentage - Secondary Macronutrients */}
                 <Card className="flex-1">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-sm">
@@ -233,14 +230,8 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
-              ) : (
-                <Card className="flex-1">
-                  <Loader size={40} className="m-auto animate-spin" />
-                </Card>
-              )}
 
-              {/* dS/m - Electrical Conductivity */}
-              {chemicalData ? (
+                {/* dS/m - Electrical Conductivity */}
                 <Card className="flex-1">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-sm">
@@ -261,14 +252,7 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
-              ) : (
-                <Card className="flex-1">
-                  <Loader size={40} className="m-auto animate-spin" />
-                </Card>
-              )}
-
-              {/* pH - Soil Acidity/Alkalinity */}
-              {chemicalData ? (
+                {/* pH - Soil Acidity/Alkalinity */}
                 <Card className="flex-1">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-sm">
@@ -284,13 +268,7 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
-              ) : (
-                <Card className="flex-1">
-                  <Loader size={40} className="m-auto animate-spin" />
-                </Card>
-              )}
-            </div>
-            {chemicalData ? (
+              </div>
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -351,14 +329,8 @@ export default function Dashboard() {
                   </ChartContainer>
                 </CardContent>
               </Card>
-            ) : (
-              <Card className="flex-1">
-                <Loader size={80} className="m-auto animate-spin" />
-              </Card>
-            )}
 
-            {/* PPM - Micronutrients */}
-            {chemicalData ? (
+              {/* PPM - Micronutrients */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -412,14 +384,16 @@ export default function Dashboard() {
                   </ChartContainer>
                 </CardContent>
               </Card>
-            ) : (
-              <Card className="flex-1">
-                <Loader size={80} className="m-auto animate-spin" />
-              </Card>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full">
+              <p className="text-2xl font-bold">No data available</p>
+              <p className="text-sm text-gray-600">
+                Please wait while we fetch the data
+              </p>
+            </div>
+          )}
         </div>
-
         <div className={"w-3/5 flex flex-col items-center justify-center"}>
           <div className="relative w-full h-full p-4">
             <div

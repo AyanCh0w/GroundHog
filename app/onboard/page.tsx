@@ -137,14 +137,11 @@ export default function OnboardPage() {
         .insert([
           {
             farm_name: farmData.farmName,
+            farm_id: farmData.farmName.toLowerCase().replace(/ /g, "_"),
             farmer_name: farmData.farmerName,
             lat: farmData.latitude,
             long: farmData.longitude,
             created_at: new Date().toISOString(),
-            lat_bounds_one: null,
-            lat_bounds_two: null,
-            long_bounds_one: null,
-            long_bounds_two: null,
           },
         ])
         .select();
