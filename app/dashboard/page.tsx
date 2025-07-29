@@ -67,7 +67,7 @@ export default function Dashboard() {
     React.useState<null | ChemicalEstimate>();
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [mapStyle, setMapStyle] = React.useState<string>("standard-satellite");
-  const [largeMap, setLargeMap] = React.useState<String>("3/5");
+  const [largeMap, setLargeMap] = React.useState<String>("2/5");
 
   const [farmName, setFarmName] = React.useState<string>("");
   const [farmerName, setFarmerName] = React.useState<string>("");
