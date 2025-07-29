@@ -224,8 +224,8 @@ export default function Dashboard() {
           {/* Soil Analysis */}
 
           {chemicalData ? (
-            <div>
-              <div className="flex gap-4">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-row gap-4">
                 {/* Percentage - Secondary Macronutrients */}
                 <Card className="flex-1">
                   <CardHeader>
@@ -456,27 +456,7 @@ export default function Dashboard() {
                   <SelectItem value="EC">Electrical Conductivity</SelectItem>
                 </SelectContent>
               </Select>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-[180px] justify-between"
-                  >
-                    {selectedDate
-                      ? selectedDate.toLocaleDateString()
-                      : "Select Date"}
-                    <ChevronDownIcon className="ml-2 h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    captionLayout="dropdown"
-                    onSelect={(date) => setSelectedDate(date)}
-                  />
-                </PopoverContent>
-              </Popover>
+
               <Select value={mapStyle} onValueChange={setMapStyle}>
                 <SelectTrigger className="w-[200px] bg-white">
                   <SelectValue placeholder="Map Style" />

@@ -134,7 +134,7 @@ specific locations in their field.`;
         </div>
         <br />
         <div className="relative z-20 flex flex-row items-center justify-center w-full">
-          <Link href={"/dashboard"}>
+          <Link href={"/login"}>
             <Button
               className="cursor-pointer w-38  border-4 border-black"
               variant="secondary"
@@ -143,7 +143,7 @@ specific locations in their field.`;
             </Button>
           </Link>
 
-          <Link href={"/dashboard"}>
+          <Link href={"/onboard"}>
             <Button
               className="cursor-pointer w-38 border-4 border-black"
               variant="secondary"
