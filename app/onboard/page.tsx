@@ -23,6 +23,7 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface FarmData {
   farmName: string;
@@ -53,7 +54,7 @@ export default function OnboardPage() {
     if (currentStep === 2 && mapContainer.current && !map.current) {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/satellite-v9",
+        style: "mapbox://styles/mapbox/satellite-streets-v12",
         center: [-90, 38], // Default to NYC, will be updated with user location
         zoom: 3,
       });
@@ -317,10 +318,17 @@ export default function OnboardPage() {
                       {farmData.latitude.toFixed(6)},{" "}
                       {farmData.longitude.toFixed(6)}
                     </p>
-                    <p>
-                      <span className="font-medium">Farm ID:</span>{" "}
-                      {farmData.farmName.toLowerCase().replace(/ /g, "_")}
-                    </p>
+
+                    <Alert variant="destructive">
+                      <AlertTitle>
+                        Farm ID (Save this as you will need this to login)
+                      </AlertTitle>
+                      <AlertDescription>
+                        <p className="font-mono text-lg">
+                          {farmData.farmName.toLowerCase().replace(/ /g, "_")}
+                        </p>
+                      </AlertDescription>
+                    </Alert>
                   </div>
                 </div>
               </div>
