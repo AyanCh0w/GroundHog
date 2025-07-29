@@ -46,6 +46,7 @@ import {
   ChevronDownIcon,
   ArrowLeftToLineIcon,
   ArrowRightToLineIcon,
+  Loader,
 } from "lucide-react";
 
 // Types & data utilities
@@ -193,7 +194,7 @@ export default function Dashboard() {
 
       <div className="flex flex-row w-screen h-[calc(100vh-40px)]">
         <div
-          className={`w-${largeMap} flex flex-col p-4 bg-white gap-4 overflow-y-auto`}
+          className={`w-${largeMap} flex flex-col p-4 bg-white gap-4 overflow-y-scroll `}
         >
           <div className="flex flex-col p-4">
             <p className="text-2xl font-bold mb-2">USG Farms</p>
@@ -224,7 +225,7 @@ export default function Dashboard() {
               </Card>
             ) : (
               <Card className="flex-1">
-                <Skeleton className="w-full h-40" />
+                <Loader size={40} className="m-auto animate-spin" />
               </Card>
             )}
 
@@ -252,7 +253,7 @@ export default function Dashboard() {
               </Card>
             ) : (
               <Card className="flex-1">
-                <Skeleton className="w-full h-40" />
+                <Loader size={40} className="m-auto animate-spin" />
               </Card>
             )}
 
@@ -275,7 +276,7 @@ export default function Dashboard() {
               </Card>
             ) : (
               <Card className="flex-1">
-                <Skeleton className="w-full h-40" />
+                <Loader size={40} className="m-auto animate-spin" />
               </Card>
             )}
           </div>
@@ -332,8 +333,8 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="w-full h-full">
-              <Skeleton className="w-80 h-80" />
+            <Card className="flex-1">
+              <Loader size={80} className="m-auto animate-spin" />
             </Card>
           )}
 
@@ -389,8 +390,8 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="w-full h-full">
-              <Skeleton className="w-80 h-80" />
+            <Card className="flex-1">
+              <Loader size={80} className="m-auto animate-spin" />
             </Card>
           )}
 
