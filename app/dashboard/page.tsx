@@ -8,7 +8,7 @@ import mapboxgl, { Map } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 // Charts (Recharts & custom chart components)
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
@@ -49,6 +49,7 @@ import { ChemicalEstimate } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 import { heatmapConfigs } from "@/components/heatmapConfig";
 import type { FeatureCollection, Feature, Point } from "geojson";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -70,7 +71,7 @@ export default function Dashboard() {
         .select("*")
         .eq("farm_id", "usg");
 
-      setChemicalData(chemicalData ? chemicalData[0] : null);
+      setChemicalData(chemicalData ? chemicalData[1] : null);
     }
 
     getChemicalData();
@@ -193,14 +194,92 @@ export default function Dashboard() {
               Nitrogen and potassium are sufficient, but phosphorus is slightly
               low, requiring targeted supplementation.
             </p>
+            <Button
+              onClick={() => {
+                console.log(chemicalData);
+                console.log(roverPoints);
+              }}
+            >
+              test
+            </Button>
+          </div>
+          <div className="flex gap-4">
+            {/* Percentage - Secondary Macronutrients */}
+            {chemicalData ? (
+              <Card className="flex-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    Sulphur (S)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600">
+                      {chemicalData.sulphur}
+                    </div>
+                    <div className="text-sm text-gray-600">Percentage (%)</div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="flex-1">
+                <Skeleton className="w-full h-40" />
+              </Card>
+            )}
+
+            {/* dS/m - Electrical Conductivity */}
+            {chemicalData ? (
+              <Card className="flex-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    Electrical Conductivity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-red-600">
+                      {chemicalData.ec}
+                    </div>
+                    <div className="text-sm text-gray-600">dS/m</div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="flex-1">
+                <Skeleton className="w-full h-40" />
+              </Card>
+            )}
+
+            {/* pH - Soil Acidity/Alkalinity */}
+            {chemicalData ? (
+              <Card className="flex-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    Soil acidity/alkalinity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-yellow-600">
+                      {chemicalData.ph}
+                    </div>
+                    <div className="text-sm text-gray-600">pH</div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="flex-1">
+                <Skeleton className="w-full h-40" />
+              </Card>
+            )}
           </div>
           {chemicalData ? (
             <Card>
               <CardHeader>
-                <CardTitle>Chemical Estimate</CardTitle>
-                <CardDescription>
-                  Nitrogen, Phosphorus & Potassium levels
-                </CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  Macronutrients
+                </CardTitle>
+                <CardDescription>Kilograms per Hectare (Kg/Ha)</CardDescription>
               </CardHeader>
               <CardContent>
                 <ChartContainer
@@ -221,6 +300,8 @@ export default function Dashboard() {
                       },
                       { name: "Potassium (K)", value: chemicalData.potassium },
                     ]}
+                    width={400}
+                    height={200}
                   >
                     <CartesianGrid vertical={false} />
                     <XAxis
@@ -229,26 +310,85 @@ export default function Dashboard() {
                       tickMargin={10}
                       axisLine={false}
                     />
+                    <YAxis
+                      dataKey="value"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                    />
                     <ChartTooltip
                       cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
+                      content={<ChartTooltipContent />}
                     />
                     <Bar dataKey="value" fill="var(--color-value)" radius={8} />
                   </BarChart>
                 </ChartContainer>
               </CardContent>
-              <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 leading-none font-medium">
-                  Latest chemical estimate from{" "}
-                  {new Date(chemicalData.created_at).toLocaleDateString()}
-                </div>
-              </CardFooter>
             </Card>
           ) : (
-            <p className="text-sm text-gray-500">
-              Loading chemical estimate...
-            </p>
+            <Card className="w-full h-full">
+              <Skeleton className="w-80 h-80" />
+            </Card>
           )}
+
+          {/* PPM - Micronutrients */}
+          {chemicalData ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Macronutrients
+                </CardTitle>
+                <CardDescription>Parts Per Million (PPM)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{
+                    value: {
+                      label: "Value",
+                      color: "var(--chart-1)",
+                    },
+                  }}
+                >
+                  <BarChart
+                    accessibilityLayer
+                    data={[
+                      { name: "Copper (Cu)", value: chemicalData.copper },
+                      { name: "Iron (Fe)", value: chemicalData.iron },
+                      { name: "Zinc (Zn)", value: chemicalData.zinc },
+                      { name: "Boron (B)", value: chemicalData.boron },
+                    ]}
+                    width={400}
+                    height={200}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      dataKey="value"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent />}
+                    />
+                    <Bar dataKey="value" fill="var(--color-value)" radius={8} />
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="w-full h-full">
+              <Skeleton className="w-80 h-80" />
+            </Card>
+          )}
+
+          {/* Single Value Charts - Horizontal Layout */}
         </div>
 
         <div className="w-3/5 flex flex-col items-center justify-center">

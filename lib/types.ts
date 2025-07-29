@@ -17,4 +17,11 @@ export interface ChemicalEstimate {
   nitrogen: number;
   phosphorus: number;
   potassium: number;
+  ec: number;
+  sulphur: number;
+  ph: number;
+  zinc: number;
+  iron: number;
+  boron: number;
+  copper: number;
 }
