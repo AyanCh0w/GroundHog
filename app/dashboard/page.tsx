@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 // Mapbox
 import mapboxgl, { Map } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import mqtt, { MqttClient } from "mqtt";
 
 // Charts (Recharts & custom chart components)
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -60,6 +61,39 @@ export default function Dashboard() {
   const [mapCenter, setMapCenter] = React.useState<[number, number]>([0, 0]);
 
   const [roverPointsDebug, setRoverPointsDebug] = React.useState<string>("");
+
+  useEffect(() => {
+    // HiveMQ WebSocket Demo URL (use wss for secure)
+    const client: MqttClient = mqtt.connect(
+      "wss://mqtt-dashboard.com:8884/mqtt"
+    );
+
+    client.on("connect", () => {
+      console.log("✅ Connected to MQTT broker");
+      // Subscribe to a topic (example: 'test/topic')
+      client.subscribe("jumpstart/ultra", (err) => {
+        if (err) {
+          console.error("❌ Subscription error:", err);
+        } else {
+          console.log("📡 Subscribed ");
+        }
+      });
+    });
+
+    client.on("message", (topic, message) => {
+      // Log message payload
+      console.log(`📥 Topic: ${topic}, Message: ${message.toString()}`);
+    });
+
+    client.on("error", (err) => {
+      console.error("❌ MQTT Error:", err);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      if (client.connected) client.end();
+    };
+  }, []);
 
   // Fetch recent soil chemical analysis
   useEffect(() => {
