@@ -36,7 +36,6 @@ specific locations in their field.`;
         i++;
         if (i === tagline.length) {
           clearInterval(interval);
-          // Wait a bit after typing is complete before transitioning
           setTimeout(() => setShowSplash(false), 1500);
         }
       }, 50);
