@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Navbar } from "@/components/ui/navbar";
 
 export default function Home() {
   const tagline = "Know Your Soil, Grow Your Future — with GroundHog.";
@@ -22,9 +24,8 @@ transmitting soil data (pH, electrical conductivity, temperature, moisture) to a
 interactive website (here) where farmers can view soil conditions mapped to
 specific locations in their field.`;
 
-  const [displayedText, setDisplayedText] = useState("");
   const [showSplash, setShowSplash] = useState(true);
-  const [fadeOut, setFadeOut] = useState(false);
+  const [displayedText, setDisplayedText] = useState("");
   const [splashTagline, setSplashTagline] = useState("");
 
   useEffect(() => {
@@ -33,20 +34,15 @@ specific locations in their field.`;
       const interval = setInterval(() => {
         setSplashTagline(tagline.slice(0, i + 1));
         i++;
-        if (i === tagline.length) clearInterval(interval);
-      }, 30);
+        if (i === tagline.length) {
+          clearInterval(interval);
+          // Wait a bit after typing is complete before transitioning
+          setTimeout(() => setShowSplash(false), 1500);
+        }
+      }, 50);
       return () => clearInterval(interval);
     }
-  }, [showSplash]);
-
-  useEffect(() => {
-    const timer1 = setTimeout(() => setFadeOut(true), 2000);
-    const timer2 = setTimeout(() => setShowSplash(false), 2500);
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
+  }, [showSplash, tagline]);
 
   useEffect(() => {
     if (!showSplash) {
@@ -60,107 +56,261 @@ specific locations in their field.`;
     }
   }, [showSplash]);
 
-  // ...existing code...
+  const titleColors = [
+    "#f0ead2", // Light cream
+    "#dde5b6", // Light green
+    "#adc178", // Medium green
+    "#a98467", // Brown
+    "#f0ead2", // Light cream
+    "#dde5b6", // Light green
+    "#adc178", // Medium green
+    "#a98467", // Brown
+    "#f0ead2", // Light cream
+  ];
+
+  const titleLetters = "GROUNDHOG";
+
+  const splashVariants = {
+    initial: { opacity: 0, scale: 0.8 },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.8, ease: "easeOut" as const },
+    },
+    exit: {
+      opacity: 0,
+      scale: 1.1,
+      transition: { duration: 0.5, ease: "easeIn" as const },
+    },
+  };
+
+  const letterVariants = {
+    initial: { opacity: 0, y: 50, scale: 0.5 },
+    animate: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.6,
+        ease: "easeOut" as const,
+        type: "spring" as const,
+        stiffness: 100,
+      },
+    }),
+    hover: {
+      y: -10,
+      scale: 1.1,
+      transition: { duration: 0.2, ease: "easeInOut" as const },
+    },
+  };
+
+  const buttonVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 1.2 + i * 0.2,
+        duration: 0.6,
+        ease: "easeOut" as const,
+      },
+    }),
+    hover: {
+      scale: 1.05,
+      transition: { duration: 0.2, ease: "easeInOut" as const },
+    },
+    tap: {
+      scale: 0.95,
+      transition: { duration: 0.1 },
+    },
+  };
+
+  const contentVariants = {
+    initial: { opacity: 0, y: 30 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 1.8,
+        duration: 0.8,
+        ease: "easeOut" as const,
+      },
+    },
+  };
+
+  const textVariants = {
+    initial: { opacity: 0 },
+    animate: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeInOut" as const,
+      },
+    },
+  };
+
   if (showSplash) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white">
-        {/* Splash Content */}
-        <div className="relative z-20 flex flex-col items-center justify-center w-full">
-          <img
-            src="https://img.freepik.com/premium-vector/groundhog-logo-design-vector-illustration_685330-1069.jpg?w=360"
-            alt="Groundhog Logo"
-            className={`w-64 h-64 object-contain mb-8 transition-opacity duration-500 ${
-              fadeOut ? "opacity-0" : "opacity-100"
-            }`}
-          />
-          <p
-            className={`text-2xl font-bold text-green-700 font-mono transition-opacity duration-500 ${
-              fadeOut ? "opacity-0" : "opacity-100"
-            }`}
+      <AnimatePresence>
+        <motion.div
+          key="splash"
+          className="relative min-h-screen flex items-center justify-center overflow-hidden"
+          variants={splashVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+        >
+          <motion.div
+            className="flex flex-col items-center justify-center space-y-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
           >
-            {splashTagline}
-          </p>
-        </div>
-      </div>
+            <motion.img
+              src="https://img.freepik.com/premium-vector/groundhog-logo-design-vector-illustration_685330-1069.jpg?w=360"
+              alt="Groundhog Logo"
+              className="w-48 h-48 md:w-64 md:h-64 object-contain"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{
+                delay: 0.5,
+                duration: 1,
+                type: "spring",
+                stiffness: 100,
+              }}
+            />
+            <motion.p
+              className="text-xl md:text-2xl font-bold text-green-700 font-mono text-center px-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+            >
+              {splashTagline}
+            </motion.p>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
     );
   }
-  // ...existing code...
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden">
+      <Navbar />
       {/* Video Background */}
-      <video
+      <motion.video
         className="absolute top-0 left-0 w-full h-full object-cover z-0"
         src="https://cdn.pixabay.com/video/2023/04/25/160402-821086414_large.mp4"
         autoPlay
         loop
         muted
         playsInline
+        initial={{ scale: 1.1 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
       />
 
       {/* Overlay for readability */}
-      <div className="absolute top-0 left-0 w-full h-full bg-black/40 z-10" />
+      <motion.div
+        className="absolute top-0 left-0 w-full h-full bg-black/40 z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      />
 
       {/* Main Content */}
-      <div className="relative z-20 flex flex-col items-center justify-center w-full">
-        <div className="relative z-20 flex flex-row items-center justify-center w-full">
-          <h1 className="text-6xl font-bold" style={{ color: "#f0ead2" }}>
-            G
-          </h1>
-          <h1 className="text-6xl font-bold" style={{ color: "#dde5b6" }}>
-            R
-          </h1>
-          <h1 className="text-6xl font-bold" style={{ color: "#adc178" }}>
-            O
-          </h1>
-          <h1 className="text-6xl font-bold" style={{ color: "#a98467" }}>
-            U
-          </h1>
-          <h1 className="text-6xl font-bold" style={{ color: "#f0ead2" }}>
-            N
-          </h1>
-          <h1 className="text-6xl font-bold" style={{ color: "#dde5b6" }}>
-            D
-          </h1>
-          <h1 className="text-6xl font-bold" style={{ color: "#adc178" }}>
-            H
-          </h1>
-          <h1 className="text-6xl font-bold" style={{ color: "#a98467" }}>
-            O
-          </h1>
-          <h1 className="text-6xl font-bold" style={{ color: "#f0ead2" }}>
-            G
-          </h1>
-        </div>
-        <br />
-        <div className="relative z-20 flex flex-row items-center justify-center w-full">
-          <Link href={"/login"}>
-            <Button
-              className="cursor-pointer w-38  border-4 border-black"
-              variant="secondary"
+      <div className="relative z-20 flex flex-col items-center justify-center w-full px-4">
+        {/* Static Title */}
+        <div className="flex flex-wrap justify-center items-center gap-1 md:gap-2 mb-8">
+          {titleLetters.split("").map((letter, index) => (
+            <motion.h1
+              key={index}
+              className="text-4xl md:text-6xl lg:text-7xl font-bold cursor-default select-none"
+              style={{ color: titleColors[index] }}
+              initial={{ opacity: 0, y: 50, scale: 0.5 }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                transition: {
+                  delay: index * 0.1,
+                  duration: 0.6,
+                  ease: "easeOut" as const,
+                  type: "spring" as const,
+                  stiffness: 100,
+                },
+              }}
+              whileHover={{ y: -10, scale: 1.1 }}
+              transition={{ duration: 0.2, ease: "easeInOut" as const }}
             >
-              Log In
-            </Button>
-          </Link>
+              {letter}
+            </motion.h1>
+          ))}
+        </div>
 
-          <Link href={"/onboard"}>
-            <Button
-              className="cursor-pointer w-38 border-4 border-black"
-              variant="secondary"
+        {/* Description Section - Appears below without moving title */}
+        <div className="w-full max-w-4xl">
+          <motion.div
+            className="text-center"
+            initial={{ opacity: 0, height: 0, overflow: "hidden" }}
+            animate={{
+              opacity: 1,
+              height: "auto",
+              overflow: "visible",
+              transition: {
+                delay: 1.0,
+                duration: 0.8,
+                ease: "easeOut" as const,
+              },
+            }}
+          >
+            <motion.h2
+              className="text-3xl md:text-4xl font-bold text-white mb-6 underline decoration-green-400 decoration-2"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+                transition: {
+                  delay: 1.2,
+                  duration: 0.5,
+                  ease: "easeInOut" as const,
+                },
+              }}
             >
-              Create an account
-            </Button>
-          </Link>
+              Information
+            </motion.h2>
+
+            <motion.div
+              className="whitespace-pre-line font-mono text-white text-sm md:text-base leading-relaxed mb-6"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+                transition: {
+                  delay: 1.4,
+                  duration: 0.5,
+                  ease: "easeInOut" as const,
+                },
+              }}
+            >
+              {displayedText}
+            </motion.div>
+
+            <motion.p
+              className="text-green-400 font-bold text-lg md:text-xl"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+                transition: {
+                  delay: 1.6,
+                  duration: 0.5,
+                  ease: "easeInOut" as const,
+                },
+              }}
+            >
+              {tagline}
+            </motion.p>
+          </motion.div>
         </div>
-        <br />
-        <br />
-        <h1 className="text-4xl font-bold underline text-white">Information</h1>
-        <p className="whitespace-pre-line font-mono text-white">
-          {displayedText}
-        </p>
-        <p className="mt-4 text-green-500 font-bold text-lg">{tagline}</p>
       </div>
     </div>
   );
-  // ...existing code...
 }
