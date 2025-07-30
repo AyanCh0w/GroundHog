@@ -135,7 +135,7 @@ export default function OnboardPage() {
 
     try {
       const { data, error: supabaseError } = await supabase
-        .from("farmData")
+        .from("farm-data")
         .insert([
           {
             farm_name: farmData.farmName,

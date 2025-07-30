@@ -35,7 +35,7 @@ export default function Login() {
     try {
       // Check if farm exists in Supabase
       const { data: farmData, error: farmError } = await supabase
-        .from("farmData")
+        .from("farm-data")
         .select("farm_id, farm_name, farmer_name")
         .eq("farm_id", farmId.trim())
         .single();

@@ -1,7 +1,7 @@
 "use client";
 
 // React & core libraries
-import React, { use, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Cookies from "js-cookie";
 
 // Mapbox
@@ -11,7 +11,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 // Charts (Recharts & custom chart components)
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -19,8 +18,6 @@ import {
 
 // UI Components
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Switch } from "@/components/ui/switch";
 import {
   Card,
   CardContent,
@@ -36,20 +33,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 // Icons
-import {
-  ChevronDownIcon,
-  ArrowLeftToLineIcon,
-  ArrowRightToLineIcon,
-  Loader,
-  RefreshCcwIcon,
-} from "lucide-react";
+import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
 
 // Types & data utilities
 import { ChemicalEstimate } from "@/lib/types";
@@ -65,7 +51,6 @@ export default function Dashboard() {
   const [roverPoints, setRoverPoints] = React.useState<any[]>([]);
   const [chemicalData, setChemicalData] =
     React.useState<null | ChemicalEstimate>();
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
   const [mapStyle, setMapStyle] = React.useState<string>("standard-satellite");
   const [largeMap, setLargeMap] = React.useState<string>("w-2/5");
 
@@ -82,7 +67,7 @@ export default function Dashboard() {
 
     async function getChemicalData(): Promise<void> {
       let { data: chemicalData, error } = await supabase
-        .from("chemicalEstimate")
+        .from("chemical-estimate")
         .select("*")
         .eq("farm_id", farmID);
 
@@ -105,7 +90,7 @@ export default function Dashboard() {
     console.log("Using farm ID:", farmID);
     async function getFarmData(): Promise<void> {
       let { data: farmData, error } = await supabase
-        .from("farmData")
+        .from("farm-data")
         .select("*")
         .eq("farm_id", farmID);
 
