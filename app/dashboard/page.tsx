@@ -36,7 +36,13 @@ import {
 } from "@/components/ui/select";
 
 // Icons
-import { ArrowLeftToLineIcon, ArrowRightToLineIcon } from "lucide-react";
+import {
+  ArrowLeftToLineIcon,
+  ArrowRightToLineIcon,
+  Wifi,
+  WifiOff,
+  House,
+} from "lucide-react";
 
 // Types & data utilities
 import { ChemicalEstimate } from "@/lib/types";
@@ -62,20 +68,38 @@ export default function Dashboard() {
 
   const [roverPointsDebug, setRoverPointsDebug] = React.useState<string>("");
 
-  useEffect(() => {
-    // HiveMQ WebSocket Demo URL (use wss for secure)
+  // MQTT state
+  const [mqttStatus, setMqttStatus] = React.useState<
+    "disconnected" | "connecting" | "connected" | "error"
+  >("disconnected");
+  const [mqttClient, setMqttClient] = React.useState<MqttClient | null>(null);
+  const [roverLocation, setRoverLocation] = React.useState<{
+    lat: number;
+    long: number;
+  } | null>(null);
+  const roverMarkerRef = useRef<mapboxgl.Marker | null>(null);
+
+  const connectToMqtt = () => {
+    if (mqttStatus === "connected" || mqttStatus === "connecting") return;
+
+    setMqttStatus("connecting");
+
     const client: MqttClient = mqtt.connect(
       "wss://mqtt-dashboard.com:8884/mqtt"
     );
 
     client.on("connect", () => {
       console.log("✅ Connected to MQTT broker");
+      setMqttStatus("connected");
+      setMqttClient(client);
+
       // Subscribe to a topic (example: 'test/topic')
       client.subscribe("jumpstart/ultra", (err) => {
         if (err) {
           console.error("❌ Subscription error:", err);
+          setMqttStatus("error");
         } else {
-          console.log("📡 Subscribed ");
+          console.log("📡 Subscribed to jumpstart/ultra");
         }
       });
     });
@@ -83,17 +107,47 @@ export default function Dashboard() {
     client.on("message", (topic, message) => {
       // Log message payload
       console.log(`📥 Topic: ${topic}, Message: ${message.toString()}`);
+
+      // Try to parse location data from MQTT message
+      try {
+        const data = JSON.parse(message.toString());
+        if (data.lat && data.long) {
+          console.log(`📍 Rover location update: ${data.lat}, ${data.long}`);
+          setRoverLocation({ lat: data.lat, long: data.long });
+        }
+      } catch (error) {
+        console.log("📥 Message is not JSON or doesn't contain location data");
+      }
     });
 
     client.on("error", (err) => {
       console.error("❌ MQTT Error:", err);
+      setMqttStatus("error");
     });
 
-    // Cleanup on unmount
+    client.on("close", () => {
+      console.log("🔌 MQTT connection closed");
+      setMqttStatus("disconnected");
+      setMqttClient(null);
+    });
+  };
+
+  const disconnectFromMqtt = () => {
+    if (mqttClient && mqttStatus === "connected") {
+      mqttClient.end();
+      setMqttStatus("disconnected");
+      setMqttClient(null);
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      if (client.connected) client.end();
+      if (mqttClient && mqttClient.connected) {
+        mqttClient.end();
+      }
     };
-  }, []);
+  }, [mqttClient]);
 
   // Fetch recent soil chemical analysis
   useEffect(() => {
@@ -161,7 +215,20 @@ export default function Dashboard() {
       });
 
       // Add marker for farm center
-      new mapboxgl.Marker().setLngLat(mapCenter).addTo(mapRef.current!);
+      const farmMarker = document.createElement("House");
+      new mapboxgl.Marker({
+        element: farmMarker,
+      })
+        .setLngLat(mapCenter)
+        .addTo(mapRef.current!);
+
+      // Add animated rover marker
+      roverMarkerRef.current = new mapboxgl.Marker({
+        color: "#F84C4C", // Red color for rover
+        scale: 1.2,
+      })
+        .setLngLat(mapCenter)
+        .addTo(mapRef.current!);
 
       // Add navigation control
       const nav = new mapboxgl.NavigationControl({
@@ -224,6 +291,42 @@ export default function Dashboard() {
   useEffect(() => {
     mapRef.current!.setStyle("mapbox://styles/mapbox/" + mapStyle);
   }, [mapStyle]);
+
+  // Animate rover marker when location updates
+  useEffect(() => {
+    if (roverLocation && roverMarkerRef.current && mapRef.current) {
+      // Animate the marker to the new position
+      const animateMarker = (timestamp: number) => {
+        const currentPos = roverMarkerRef.current!.getLngLat();
+        const targetPos = [roverLocation.long, roverLocation.lat];
+
+        // Calculate the distance to move
+        const dx = targetPos[0] - currentPos.lng;
+        const dy = targetPos[1] - currentPos.lat;
+
+        // If we're close enough to the target, stop animating
+        if (Math.abs(dx) < 0.0001 && Math.abs(dy) < 0.0001) {
+          roverMarkerRef.current!.setLngLat([
+            roverLocation.long,
+            roverLocation.lat,
+          ] as [number, number]);
+          return;
+        }
+
+        // Smooth animation - move 10% of the distance each frame
+        const newLng = currentPos.lng + dx * 0.1;
+        const newLat = currentPos.lat + dy * 0.1;
+
+        roverMarkerRef.current!.setLngLat([newLng, newLat] as [number, number]);
+
+        // Continue animation
+        requestAnimationFrame(animateMarker);
+      };
+
+      // Start the animation
+      requestAnimationFrame(animateMarker);
+    }
+  }, [roverLocation]);
 
   return (
     <div className="flex flex-col">
@@ -504,6 +607,30 @@ export default function Dashboard() {
                   <SelectItem value="outdoors-v12">Street</SelectItem>
                 </SelectContent>
               </Select>
+
+              {/* MQTT Connection Button */}
+              <Button
+                variant={"outline"}
+                onClick={
+                  mqttStatus === "connected"
+                    ? disconnectFromMqtt
+                    : connectToMqtt
+                }
+                disabled={mqttStatus === "connecting"}
+              >
+                {mqttStatus === "connecting" && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
+                )}
+                {mqttStatus === "connected" && (
+                  <Wifi className="h-4 w-4 mr-2 text-green-600" />
+                )}
+                {mqttStatus === "error" && (
+                  <WifiOff className="h-4 w-4 mr-2 text-red-600" />
+                )}
+                {mqttStatus === "disconnected" && (
+                  <WifiOff className="h-4 w-4 mr-2" />
+                )}
+              </Button>
             </div>
           </div>
         </div>
