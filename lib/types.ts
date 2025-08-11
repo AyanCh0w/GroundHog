@@ -23,3 +23,29 @@ export interface ChemicalEstimate {
   boron: number;
   copper: number;
 }
+
+export interface Waypoint {
+  id: string;
+  farm_id: string;
+  name: string;
+  lat: number;
+  long: number;
+  order_index: number;
+  created_at: string;
+}
+
+export interface WaypointPath {
+  id: string;
+  farm_id: string;
+  name: string;
+  description?: string;
+  waypoints: Waypoint[];
+  created_at: string;
+  is_active: boolean;
+}
+
+export interface RoverNavigationCommand {
+  command: "start_navigation" | "stop_navigation" | "load_waypoints";
+  path_id?: string;
+  waypoints?: Array<{ lat: number; long: number; order_index: number }>;
+}

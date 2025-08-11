@@ -2,6 +2,7 @@
 
 // React & core libraries
 import React, { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
 // Mapbox
@@ -42,6 +43,7 @@ import {
   Wifi,
   WifiOff,
   House,
+  Navigation,
 } from "lucide-react";
 
 // Types & data utilities
@@ -51,6 +53,7 @@ import { heatmapConfigs } from "@/components/heatmapConfig";
 import type { FeatureCollection, Feature, Point } from "geojson";
 
 export default function Dashboard() {
+  const router = useRouter();
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const [selectedSensor, setSelectedSensor] =
@@ -151,18 +154,22 @@ export default function Dashboard() {
 
   // Fetch recent soil chemical analysis
   useEffect(() => {
-    if (!farmID) return;
+    if (!farmID) {
+      console.log("No farm ID found");
+      return;
+    }
 
     async function getChemicalData(): Promise<void> {
       let { data: chemicalData, error } = await supabase
         .from("chemical-estimate")
         .select("*")
         .eq("farm_id", farmID);
-
-      setChemicalData(chemicalData ? chemicalData[1] : null);
+      console.log("Chemical data:", chemicalData);
+      setChemicalData(chemicalData ? chemicalData[0] : null);
     }
 
     getChemicalData();
+    console.log("Chemical data:", chemicalData);
   }, [farmID]);
 
   // Set farm ID from cookie
@@ -191,17 +198,24 @@ export default function Dashboard() {
     getFarmData();
   }, [farmID]);
 
-  // Fetch rover points when sensor changes
+  // Fetch rover points when sensor changes or farmID changes
   useEffect(() => {
+    if (!farmID) {
+      console.log("No farm ID available, skipping rover points fetch");
+      return;
+    }
+
     async function fetchRoverPoints() {
       let { data: roverpoints, error } = await supabase
         .from("rover-points")
         .select("*")
         .eq("farm_id", farmID);
       if (roverpoints) setRoverPoints(roverpoints);
+      console.log("Rover points:", roverpoints);
+      console.log("Farm ID:", farmID);
     }
     fetchRoverPoints();
-  }, [selectedSensor]);
+  }, [selectedSensor, farmID]);
 
   // Update map and heatmap layer
   useEffect(() => {
@@ -630,6 +644,15 @@ export default function Dashboard() {
                 {mqttStatus === "disconnected" && (
                   <WifiOff className="h-4 w-4 mr-2" />
                 )}
+              </Button>
+
+              {/* Navigation Button */}
+              <Button
+                variant={"outline"}
+                onClick={() => router.push("/waypoints")}
+              >
+                <Navigation className="h-4 w-4 mr-2" />
+                Waypoints
               </Button>
             </div>
           </div>
