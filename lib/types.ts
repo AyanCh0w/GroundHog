@@ -24,6 +24,52 @@ export interface ChemicalEstimate {
   copper: number;
 }
 
+export interface RoverPoint {
+  id: string;
+  created_at: string;
+  farm_id: string;
+  moisture?: number;
+  temperature?: number;
+  pH?: number;
+  EC?: number;
+  lat: number;
+  long: number;
+}
+
+export interface AIAnalysisInput {
+  farm_id: string;
+  sensor_data: {
+    pH: number;
+    EC: number;
+    temperature_c: number;
+    moisture_pct: number;
+  };
+  predicted_nutrients: {
+    N_ppm: number;
+    P_ppm: number;
+    K_ppm: number;
+    Cu_ppm: number;
+    Fe_ppm: number;
+    Zn_ppm: number;
+    B_ppm: number;
+  };
+}
+
+export interface AIAnalysisOutput {
+  summary: string;
+  todos: string[];
+  status: string;
+}
+
+export interface AIAnalysisRecord {
+  id: number;
+  farm_id: string;
+  created_at: string;
+  input_data: AIAnalysisInput;
+  output_data: AIAnalysisOutput;
+  last_updated: string;
+}
+
 export interface Waypoint {
   id: string;
   farm_id: string;

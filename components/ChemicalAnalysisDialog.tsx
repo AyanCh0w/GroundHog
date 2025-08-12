@@ -19,21 +19,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/lib/supabaseClient";
+import { RoverPoint } from "@/lib/types";
 
 interface ChemicalAnalysisDialogProps {
   farmID: string | undefined;
   onAnalysisComplete?: () => void;
 }
 
-interface RoverPoint {
-  id: string;
-  created_at: string;
-  farm_id: string;
-  moisture?: number;
-  temperature?: number;
-  pH?: number;
-  EC?: number;
-  // Add other fields as needed
+interface ChemicalAnalysisDialogProps {
+  farmID: string | undefined;
+  onAnalysisComplete?: () => void;
 }
 
 export default function ChemicalAnalysisDialog({
@@ -109,10 +104,10 @@ export default function ChemicalAnalysisDialog({
       }
 
       // Calculate averages for specific stats
-      const analysis = calculateSpecificAverages(roverPoints || []);
+      const averages = calculateSpecificAverages(roverPoints || []);
 
       // Log the analysis results as JSON
-      console.log(JSON.stringify(analysis, null, 2));
+      console.log(JSON.stringify(averages, null, 2));
 
       // Close dialog and notify parent
       setIsOpen(false);

@@ -41,6 +41,8 @@ import {
   ArrowRightToLineIcon,
   House,
   Navigation,
+  Sprout,
+  Globe,
 } from "lucide-react";
 
 // Types & data utilities
@@ -49,6 +51,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { heatmapConfigs } from "@/components/heatmapConfig";
 import type { FeatureCollection, Feature, Point } from "geojson";
 import ChemicalAnalysisDialog from "@/components/ChemicalAnalysisDialog";
+import AIAnalysisBox from "@/components/AIAnalysisBox";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -229,229 +232,263 @@ export default function Dashboard() {
     <div className="flex flex-col">
       <div className="flex flex-row w-screen h-screen">
         <div
-          className={`${largeMap} flex flex-col p-4 bg-white gap-4 overflow-y-scroll `}
+          className={`${largeMap} flex flex-col p-6 bg-white gap-6 overflow-y-scroll`}
         >
-          <div className="flex flex-col p-4">
-            <p className="text-sm text-gray-600">{farmerName}</p>
-            <p className="text-2xl font-bold mb-2">{farmName}</p>
-            <p>
-              Soil pH is balanced at 6.7 with minor acidic spots. EC (1.2 dS/m),
-              moisture (30%), and temperature (22°C) are within optimal ranges.
-              Nitrogen and potassium are sufficient, but phosphorus is slightly
-              low, requiring targeted supplementation.
-            </p>
+          {/* Header Section */}
+          <div className="flex flex-col space-y-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">{farmerName}</p>
+              <h1 className="text-3xl font-bold text-gray-900">{farmName}</h1>
+            </div>
+            <AIAnalysisBox farmID={farmID} />
           </div>
-          {/* Soil Analysis */}
 
+          {/* Soil Analysis Section */}
           {chemicalData ? (
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col">
-                <div className="flex flex-row justify-center items-center gap-4 font-medium font-mono text-sm">
-                  <span>
-                    Latest Chemical Analysis:&nbsp;
-                    {new Date(chemicalData?.created_at || "")
-                      .toDateString()
-                      .slice(4)}
-                  </span>
+            <div className="space-y-6">
+              {/* Analysis Info Header */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <span>Latest Chemical Analysis:</span>
+                      <span className="font-mono text-gray-900">
+                        {new Date(chemicalData?.created_at || "")
+                          .toDateString()
+                          .slice(4)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <span>Latest Rover Input:</span>
+                      <span className="font-mono text-gray-900">
+                        {roverPoints.length > 0
+                          ? new Date(roverPoints[0]?.created_at || "")
+                              .toDateString()
+                              .slice(4)
+                          : "No data available"}
+                      </span>
+                    </div>
+                  </div>
                   <ChemicalAnalysisDialog
                     farmID={farmID}
                     onAnalysisComplete={() => {
-                      // Optionally refresh chemical data after analysis
                       console.log("Analysis completed");
                     }}
                   />
                 </div>
-                <div className="flex flex-row justify-center gap-4 font-medium font-mono text-sm">
-                  {roverPoints.length > 0
-                    ? "Latest Rover Input:"
-                    : "No Rover Data Input"}
-                  {roverPoints.length > 0 &&
-                    new Date(roverPoints[0]?.created_at || "")
-                      .toDateString()
-                      .slice(4)}
-                </div>
               </div>
-              <div className="flex flex-row gap-4">
-                {/* Percentage - Secondary Macronutrients */}
+
+              {/* Key Metrics Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Sulphur */}
                 <Card className="flex-1">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-gray-700">
                       Sulphur (S)
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="flex items-center justify-center">
+                  <CardContent className="pt-0">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-blue-600">
+                      <div className="text-3xl font-bold text-blue-600 mb-1">
                         {chemicalData.sulphur}
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-xs text-gray-500 uppercase tracking-wide">
                         Percentage (%)
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* dS/m - Electrical Conductivity */}
+                {/* Electrical Conductivity */}
                 <Card className="flex-1">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-gray-700">
                       Electrical Conductivity
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="flex items-center justify-center">
+                  <CardContent className="pt-0">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-red-600">
+                      <div className="text-3xl font-bold text-red-600 mb-1">
                         {chemicalData.ec}
                       </div>
-                      <div
-                        className="text-sm text-gray-60
-                    0"
-                      >
+                      <div className="text-xs text-gray-500 uppercase tracking-wide">
                         dS/m
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-                {/* pH - Soil Acidity/Alkalinity */}
+
+                {/* pH */}
                 <Card className="flex-1">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-sm">
-                      Soil acidity/alkalinity
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-gray-700">
+                      Soil pH
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="flex items-center justify-center">
+                  <CardContent className="pt-0">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-yellow-600">
+                      <div className="text-3xl font-bold text-yellow-600 mb-1">
                         {chemicalData.ph}
                       </div>
-                      <div className="text-sm text-gray-600">pH</div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wide">
+                        pH Level
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    Macronutrients
-                  </CardTitle>
-                  <CardDescription>
-                    Kilograms per Hectare (Kg/Ha)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      value: {
-                        label: "Value",
-                        color: "var(--chart-1)",
-                      },
-                    }}
-                  >
-                    <BarChart
-                      accessibilityLayer
-                      data={[
-                        { name: "Nitrogen (N)", value: chemicalData.nitrogen },
-                        {
-                          name: "Phosphorus (P)",
-                          value: chemicalData.phosphorus,
-                        },
-                        {
-                          name: "Potassium (K)",
-                          value: chemicalData.potassium,
-                        },
-                      ]}
-                      width={400}
-                      height={200}
-                    >
-                      <CartesianGrid vertical={false} />
-                      <XAxis
-                        dataKey="name"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        dataKey="value"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                      />
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent />}
-                      />
-                      <Bar
-                        dataKey="value"
-                        fill="var(--color-value)"
-                        radius={8}
-                      />
-                    </BarChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
 
-              {/* PPM - Micronutrients */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    Macronutrients
-                  </CardTitle>
-                  <CardDescription>Parts Per Million (PPM)</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      value: {
-                        label: "Value",
-                        color: "var(--chart-1)",
-                      },
-                    }}
-                  >
-                    <BarChart
-                      accessibilityLayer
-                      data={[
-                        { name: "Copper (Cu)", value: chemicalData.copper },
-                        { name: "Iron (Fe)", value: chemicalData.iron },
-                        { name: "Zinc (Zn)", value: chemicalData.zinc },
-                        { name: "Boron (B)", value: chemicalData.boron },
-                      ]}
-                      width={400}
-                      height={200}
-                    >
-                      <CartesianGrid vertical={false} />
-                      <XAxis
-                        dataKey="name"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        dataKey="value"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                      />
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent />}
-                      />
-                      <Bar
-                        dataKey="value"
-                        fill="var(--color-value)"
-                        radius={8}
-                      />
-                    </BarChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
+              {/* Charts Section */}
+              <div className="space-y-6">
+                {/* Macronutrients Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-gray-900">
+                      Macronutrients
+                    </CardTitle>
+                    <CardDescription className="text-gray-600">
+                      Kilograms per Hectare (Kg/Ha)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="w-full overflow-x-auto">
+                      <ChartContainer
+                        config={{
+                          value: {
+                            label: "Value",
+                            color: "var(--chart-1)",
+                          },
+                        }}
+                      >
+                        <BarChart
+                          accessibilityLayer
+                          data={[
+                            {
+                              name: "Nitrogen (N)",
+                              value: chemicalData.nitrogen,
+                            },
+                            {
+                              name: "Phosphorus (P)",
+                              value: chemicalData.phosphorus,
+                            },
+                            {
+                              name: "Potassium (K)",
+                              value: chemicalData.potassium,
+                            },
+                          ]}
+                          width={Math.max(400, window.innerWidth * 0.3)}
+                          height={200}
+                        >
+                          <CartesianGrid
+                            vertical={false}
+                            strokeDasharray="3 3"
+                          />
+                          <XAxis
+                            dataKey="name"
+                            tickLine={false}
+                            tickMargin={10}
+                            axisLine={false}
+                            fontSize={12}
+                          />
+                          <YAxis
+                            dataKey="value"
+                            tickLine={false}
+                            tickMargin={10}
+                            axisLine={false}
+                            fontSize={12}
+                          />
+                          <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent />}
+                          />
+                          <Bar
+                            dataKey="value"
+                            fill="var(--color-value)"
+                            radius={[4, 4, 0, 0]}
+                          />
+                        </BarChart>
+                      </ChartContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Micronutrients Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-gray-900">
+                      Micronutrients
+                    </CardTitle>
+                    <CardDescription className="text-gray-600">
+                      Parts Per Million (PPM)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="w-full overflow-x-auto">
+                      <ChartContainer
+                        config={{
+                          value: {
+                            label: "Value",
+                            color: "var(--chart-1)",
+                          },
+                        }}
+                      >
+                        <BarChart
+                          accessibilityLayer
+                          data={[
+                            { name: "Copper (Cu)", value: chemicalData.copper },
+                            { name: "Iron (Fe)", value: chemicalData.iron },
+                            { name: "Zinc (Zn)", value: chemicalData.zinc },
+                            { name: "Boron (B)", value: chemicalData.boron },
+                          ]}
+                          width={Math.max(400, window.innerWidth * 0.3)}
+                          height={200}
+                        >
+                          <CartesianGrid
+                            vertical={false}
+                            strokeDasharray="3 3"
+                          />
+                          <XAxis
+                            dataKey="name"
+                            tickLine={false}
+                            tickMargin={10}
+                            axisLine={false}
+                            fontSize={12}
+                          />
+                          <YAxis
+                            dataKey="value"
+                            tickLine={false}
+                            tickMargin={10}
+                            axisLine={false}
+                            fontSize={12}
+                          />
+                          <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent />}
+                          />
+                          <Bar
+                            dataKey="value"
+                            fill="var(--color-value)"
+                            radius={[4, 4, 0, 0]}
+                          />
+                        </BarChart>
+                      </ChartContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full gap-4">
-              <p className="text-2xl font-bold">No data available</p>
-              <p className="text-sm text-gray-600">
-                After you use the rover, the data will eventually show up here.
-              </p>
-              <div className="flex flex-col gap-2">
+            <div className="flex flex-col items-center justify-center py-12 gap-6">
+              <div className="text-center space-y-4">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  No data available
+                </h2>
+                <p className="text-gray-600 max-w-md">
+                  After you use the rover, the data will eventually show up
+                  here.
+                </p>
+              </div>
+              <div className="flex flex-col gap-3">
                 <ChemicalAnalysisDialog
                   farmID={farmID}
                   onAnalysisComplete={() => {
@@ -472,7 +509,7 @@ export default function Dashboard() {
                   [Debug] Fetch Rover Points
                 </Button>
               </div>
-              <p className="text-sm text-gray-600 font-mono">
+              <p className="text-sm text-gray-500 font-mono">
                 {roverPointsDebug == "[ ]" ? roverPointsDebug : "No data"}
               </p>
             </div>
@@ -486,13 +523,13 @@ export default function Dashboard() {
             />
 
             <div className="absolute top-6 left-6 z-10 flex gap-2 items-start p-2 rounded-2xl backdrop-blur-lg outline-1">
-              {/* Sensor Dropdown */}
+              {/* Toggle Map Size Button */}
               <Button
                 variant={"outline"}
                 onClick={() => {
                   setLargeMap(largeMap === "w-2/5" ? "w-4/5" : "w-2/5");
-                  console.log(largeMap);
                 }}
+                title={largeMap === "w-2/5" ? "Expand Map" : "Collapse Map"}
               >
                 {largeMap === "w-2/5" ? (
                   <ArrowRightToLineIcon />
@@ -500,9 +537,21 @@ export default function Dashboard() {
                   <ArrowLeftToLineIcon />
                 )}
               </Button>
+
+              {/* Sensor Dropdown */}
               <Select value={selectedSensor} onValueChange={setSelectedSensor}>
-                <SelectTrigger className="w-[200px] bg-white">
-                  <SelectValue placeholder="Sensor Map Display" />
+                <SelectTrigger
+                  className={`${
+                    largeMap === "w-4/5" ? "w-12" : "w-[200px]"
+                  } bg-white transition-all duration-200`}
+                >
+                  {largeMap === "w-4/5" ? (
+                    <div className="flex items-center justify-center">
+                      <Sprout className="h-4 w-4" />
+                    </div>
+                  ) : (
+                    <SelectValue placeholder="Sensor Map Display" />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="moisture">Moisture</SelectItem>
@@ -512,9 +561,20 @@ export default function Dashboard() {
                 </SelectContent>
               </Select>
 
+              {/* Map Style Dropdown */}
               <Select value={mapStyle} onValueChange={setMapStyle}>
-                <SelectTrigger className="w-[200px] bg-white">
-                  <SelectValue placeholder="Map Style" />
+                <SelectTrigger
+                  className={`${
+                    largeMap === "w-4/5" ? "w-12" : "w-[200px]"
+                  } bg-white transition-all duration-200`}
+                >
+                  {largeMap === "w-4/5" ? (
+                    <div className="flex items-center justify-center">
+                      <Globe className="h-4 w-4" />
+                    </div>
+                  ) : (
+                    <SelectValue placeholder="Map Style" />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="standard-satellite">Satellite</SelectItem>
@@ -526,9 +586,13 @@ export default function Dashboard() {
               <Button
                 variant={"outline"}
                 onClick={() => router.push("/waypoints")}
+                title="Waypoints"
+                className={largeMap === "w-4/5" ? "px-2" : ""}
               >
-                <Navigation className="h-4 w-4 mr-2" />
-                Waypoints
+                <Navigation className="h-4 w-4" />
+                {largeMap === "w-4/5" ? null : (
+                  <span className="ml-2">Waypoints</span>
+                )}
               </Button>
             </div>
           </div>
