@@ -326,8 +326,8 @@ function WaypointMap({
   );
 }
 
-// Separate component that uses useSearchParams
-function NavigatePageContent() {
+// Separate component to handle search params
+function NavigationContent() {
   const searchParams = useSearchParams();
   const pathId = searchParams.get("path");
   const [waypointPath, setWaypointPath] = useState<WaypointPath | null>(null);
@@ -640,24 +640,21 @@ function NavigatePageContent() {
   );
 }
 
-// Loading fallback component
-function NavigatePageFallback() {
-  return (
-    <div className="container mx-auto p-6 space-y-6">
-      <Skeleton className="h-8 w-64" />
-      <div className="grid gap-4">
-        <Skeleton className="h-96 w-full" />
-        <Skeleton className="h-24 w-full" />
-      </div>
-    </div>
-  );
-}
-
-// Main export with Suspense boundary
+// Main page component with Suspense boundary
 export default function NavigatePage() {
   return (
-    <Suspense fallback={<NavigatePageFallback />}>
-      <NavigatePageContent />
+    <Suspense
+      fallback={
+        <div className="container mx-auto p-6 space-y-6">
+          <Skeleton className="h-8 w-64" />
+          <div className="grid gap-4">
+            <Skeleton className="h-96 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+        </div>
+      }
+    >
+      <NavigationContent />
     </Suspense>
   );
 }
