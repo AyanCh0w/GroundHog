@@ -48,6 +48,7 @@ import { ChemicalEstimate } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 import { heatmapConfigs } from "@/components/heatmapConfig";
 import type { FeatureCollection, Feature, Point } from "geojson";
+import ChemicalAnalysisDialog from "@/components/ChemicalAnalysisDialog";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -245,11 +246,20 @@ export default function Dashboard() {
           {chemicalData ? (
             <div className="flex flex-col gap-4">
               <div className="flex flex-col">
-                <div className="flex flex-row justify-center gap-4 font-medium font-mono text-sm">
-                  Latest Chemical Analysis:&nbsp;
-                  {new Date(chemicalData?.created_at || "")
-                    .toDateString()
-                    .slice(4)}
+                <div className="flex flex-row justify-center items-center gap-4 font-medium font-mono text-sm">
+                  <span>
+                    Latest Chemical Analysis:&nbsp;
+                    {new Date(chemicalData?.created_at || "")
+                      .toDateString()
+                      .slice(4)}
+                  </span>
+                  <ChemicalAnalysisDialog
+                    farmID={farmID}
+                    onAnalysisComplete={() => {
+                      // Optionally refresh chemical data after analysis
+                      console.log("Analysis completed");
+                    }}
+                  />
                 </div>
                 <div className="flex flex-row justify-center gap-4 font-medium font-mono text-sm">
                   {roverPoints.length > 0
@@ -441,19 +451,27 @@ export default function Dashboard() {
               <p className="text-sm text-gray-600">
                 After you use the rover, the data will eventually show up here.
               </p>
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  setRoverPointsDebug("Fetching...");
-                  let { data: roverpoints, error } = await supabase
-                    .from("rover-points")
-                    .select("*")
-                    .eq("farm_id", farmID);
-                  setRoverPointsDebug(JSON.stringify(roverpoints));
-                }}
-              >
-                [Debug] Fetch Rover Points
-              </Button>
+              <div className="flex flex-col gap-2">
+                <ChemicalAnalysisDialog
+                  farmID={farmID}
+                  onAnalysisComplete={() => {
+                    console.log("Analysis completed");
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    setRoverPointsDebug("Fetching...");
+                    let { data: roverpoints, error } = await supabase
+                      .from("rover-points")
+                      .select("*")
+                      .eq("farm_id", farmID);
+                    setRoverPointsDebug(JSON.stringify(roverpoints));
+                  }}
+                >
+                  [Debug] Fetch Rover Points
+                </Button>
+              </div>
               <p className="text-sm text-gray-600 font-mono">
                 {roverPointsDebug == "[ ]" ? roverPointsDebug : "No data"}
               </p>
