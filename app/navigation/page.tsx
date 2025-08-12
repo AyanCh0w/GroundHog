@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { WaypointPath } from "@/lib/types";
@@ -326,7 +326,8 @@ function WaypointMap({
   );
 }
 
-export default function NavigatePage() {
+// Separate component that uses useSearchParams
+function NavigatePageContent() {
   const searchParams = useSearchParams();
   const pathId = searchParams.get("path");
   const [waypointPath, setWaypointPath] = useState<WaypointPath | null>(null);
@@ -636,5 +637,27 @@ export default function NavigatePage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// Loading fallback component
+function NavigatePageFallback() {
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <Skeleton className="h-8 w-64" />
+      <div className="grid gap-4">
+        <Skeleton className="h-96 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    </div>
+  );
+}
+
+// Main export with Suspense boundary
+export default function NavigatePage() {
+  return (
+    <Suspense fallback={<NavigatePageFallback />}>
+      <NavigatePageContent />
+    </Suspense>
   );
 }
