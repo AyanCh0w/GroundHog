@@ -3,6 +3,7 @@
 // React & core libraries
 import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Cookies from "js-cookie";
 
 // Mapbox
@@ -443,9 +444,19 @@ export default function Dashboard() {
         >
           {/* Header Section */}
           <div className="flex flex-col space-y-4">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">{farmerName}</p>
-              <h1 className="text-3xl font-bold text-gray-900">{farmName}</h1>
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">{farmerName}</p>
+                <h1 className="text-3xl font-bold text-gray-900">{farmName}</h1>
+              </div>
+              <Link href="/demo">
+                <Button
+                  variant="outline"
+                  className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
+                >
+                  🚀 Demo Rover
+                </Button>
+              </Link>
             </div>
             <AIAnalysisBox farmID={farmID} />
           </div>

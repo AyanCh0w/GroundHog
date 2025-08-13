@@ -74,6 +74,24 @@ export function Navbar() {
               whileHover="hover"
               whileTap="tap"
             >
+              <Link href="/demo">
+                <Button
+                  variant="outline"
+                  className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-all duration-200"
+                >
+                  Demo
+                </Button>
+              </Link>
+            </motion.div>
+
+            <motion.div
+              custom={1}
+              variants={buttonVariants}
+              initial="initial"
+              animate="animate"
+              whileHover="hover"
+              whileTap="tap"
+            >
               <Link href="/login">
                 <Button
                   variant="outline"
@@ -85,7 +103,7 @@ export function Navbar() {
             </motion.div>
 
             <motion.div
-              custom={1}
+              custom={2}
               variants={buttonVariants}
               initial="initial"
               animate="animate"
