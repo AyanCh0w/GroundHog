@@ -216,7 +216,7 @@ export default function DemoPage() {
                 {/* Middle Row - Left and Right */}
                 <div className="flex gap-8">
                   <Button
-                    onClick={() => sendCommand("turn", 30)}
+                    onClick={() => sendCommand("turn", -30)}
                     disabled={mqttStatus !== "connected"}
                     size="lg"
                     className="h-16 w-32 bg-blue-600 hover:bg-blue-700 text-white"
@@ -225,7 +225,7 @@ export default function DemoPage() {
                   </Button>
 
                   <Button
-                    onClick={() => sendCommand("turn", -30)}
+                    onClick={() => sendCommand("turn", 30)}
                     disabled={mqttStatus !== "connected"}
                     size="lg"
                     className="h-16 w-32 bg-blue-600 hover:bg-blue-700 text-white"
