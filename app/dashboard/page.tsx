@@ -75,25 +75,71 @@ export default function Dashboard() {
 
   const roverMarkerRef = useRef<mapboxgl.Marker | null>(null);
 
-  // Fetch recent soil chemical analysis
-  useEffect(() => {
+  // Function to calculate average EC and pH from rover points
+  const calculateRoverAverages = (): {
+    ec: number;
+    ph: number;
+    ecCount: number;
+    phCount: number;
+  } => {
+    if (!roverPoints || roverPoints.length === 0) {
+      return { ec: 0, ph: 0, ecCount: 0, phCount: 0 };
+    }
+
+    let ecTotal = 0;
+    let phTotal = 0;
+    let ecCount = 0;
+    let phCount = 0;
+
+    roverPoints.forEach((point) => {
+      if (point.EC !== null && point.EC !== undefined) {
+        ecTotal += point.EC;
+        ecCount++;
+      }
+      if (point.pH !== null && point.pH !== undefined) {
+        phTotal += point.pH;
+        phCount++;
+      }
+    });
+
+    return {
+      ec: ecCount > 0 ? Math.round((ecTotal / ecCount) * 100) / 100 : 0,
+      ph: phCount > 0 ? Math.round((phTotal / phCount) * 100) / 100 : 0,
+      ecCount,
+      phCount,
+    };
+  };
+
+  // Function to fetch chemical data
+  const getChemicalData = async (): Promise<void> => {
     if (!farmID) {
       console.log("No farm ID found");
       return;
     }
 
-    async function getChemicalData(): Promise<void> {
-      let { data: chemicalData, error } = await supabase
-        .from("chemical-estimate")
-        .select("*")
-        .eq("farm_id", farmID);
-      console.log("Chemical data:", chemicalData);
-      setChemicalData(chemicalData ? chemicalData[0] : null);
-    }
+    let { data: chemicalData, error } = await supabase
+      .from("chemical-estimate")
+      .select("*")
+      .eq("farm_id", farmID)
+      .order("created_at", { ascending: false });
 
-    getChemicalData();
     console.log("Chemical data:", chemicalData);
+    setChemicalData(
+      chemicalData && chemicalData.length > 0 ? chemicalData[0] : null
+    );
+  };
+
+  // Fetch recent soil chemical analysis
+  useEffect(() => {
+    getChemicalData();
   }, [farmID]);
+
+  // Function to handle analysis completion and refresh data
+  const handleAnalysisComplete = () => {
+    console.log("Analysis completed");
+    // Refresh chemical data to show latest analysis
+    getChemicalData();
+  };
 
   // Set farm ID from cookie
   useEffect(() => {
@@ -148,7 +194,7 @@ export default function Dashboard() {
         container: mapContainerRef.current,
         style: "mapbox://styles/mapbox/satellite-streets-v12",
         center: mapCenter,
-        zoom: 18,
+        zoom: 19,
       });
 
       // Add marker for farm center
@@ -449,14 +495,6 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-600 mb-1">{farmerName}</p>
                 <h1 className="text-3xl font-bold text-gray-900">{farmName}</h1>
               </div>
-              <Link href="/demo">
-                <Button
-                  variant="outline"
-                  className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
-                >
-                  🚀 Demo Rover
-                </Button>
-              </Link>
             </div>
             <AIAnalysisBox farmID={farmID} />
           </div>
@@ -479,8 +517,12 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
                       <span>Latest Rover Input:</span>
                       <span className="font-mono text-gray-900">
-                        {roverPoints.length > 0
-                          ? new Date(roverPoints[0]?.created_at || "")
+                        {roverPoints.length > 0 &&
+                        roverPoints[roverPoints.length - 1]?.created_at
+                          ? new Date(
+                              roverPoints[roverPoints.length - 1]?.created_at ||
+                                ""
+                            )
                               .toDateString()
                               .slice(4)
                           : "No data available"}
@@ -508,10 +550,10 @@ export default function Dashboard() {
                   <CardContent className="pt-0">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-blue-600 mb-1">
-                        {chemicalData.sulphur}
+                        {chemicalData?.sulphur || 0}
                       </div>
                       <div className="text-xs text-gray-500 uppercase tracking-wide">
-                        Percentage (%)
+                        PPM
                       </div>
                     </div>
                   </CardContent>
@@ -527,10 +569,12 @@ export default function Dashboard() {
                   <CardContent className="pt-0">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-red-600 mb-1">
-                        {chemicalData.ec}
+                        {calculateRoverAverages().ecCount > 0
+                          ? calculateRoverAverages().ec
+                          : "N/A"}
                       </div>
                       <div className="text-xs text-gray-500 uppercase tracking-wide">
-                        dS/m
+                        dS/m (Rover Average)
                       </div>
                     </div>
                   </CardContent>
@@ -546,10 +590,12 @@ export default function Dashboard() {
                   <CardContent className="pt-0">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-yellow-600 mb-1">
-                        {chemicalData.ph}
+                        {calculateRoverAverages().phCount > 0
+                          ? calculateRoverAverages().ph
+                          : "N/A"}
                       </div>
                       <div className="text-xs text-gray-500 uppercase tracking-wide">
-                        pH Level
+                        pH Level (Rover Average)
                       </div>
                     </div>
                   </CardContent>
@@ -565,7 +611,7 @@ export default function Dashboard() {
                       Macronutrients
                     </CardTitle>
                     <CardDescription className="text-gray-600">
-                      Kilograms per Hectare (Kg/Ha)
+                      Parts Per Million (PPM)
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -583,15 +629,15 @@ export default function Dashboard() {
                           data={[
                             {
                               name: "Nitrogen (N)",
-                              value: chemicalData.nitrogen,
+                              value: chemicalData?.nitrogen || 0,
                             },
                             {
                               name: "Phosphorus (P)",
-                              value: chemicalData.phosphorus,
+                              value: chemicalData?.phosphorus || 0,
                             },
                             {
                               name: "Potassium (K)",
-                              value: chemicalData.potassium,
+                              value: chemicalData?.potassium || 0,
                             },
                           ]}
                           width={Math.max(400, window.innerWidth * 0.3)}
@@ -653,10 +699,22 @@ export default function Dashboard() {
                         <BarChart
                           accessibilityLayer
                           data={[
-                            { name: "Copper (Cu)", value: chemicalData.copper },
-                            { name: "Iron (Fe)", value: chemicalData.iron },
-                            { name: "Zinc (Zn)", value: chemicalData.zinc },
-                            { name: "Boron (B)", value: chemicalData.boron },
+                            {
+                              name: "Copper (Cu)",
+                              value: chemicalData?.copper || 0,
+                            },
+                            {
+                              name: "Iron (Fe)",
+                              value: chemicalData?.iron || 0,
+                            },
+                            {
+                              name: "Zinc (Zn)",
+                              value: chemicalData?.zinc || 0,
+                            },
+                            {
+                              name: "Boron (B)",
+                              value: chemicalData?.boron || 0,
+                            },
                           ]}
                           width={Math.max(400, window.innerWidth * 0.3)}
                           height={200}

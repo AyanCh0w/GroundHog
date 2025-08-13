@@ -247,11 +247,12 @@ export default function DemoPage() {
                 {/* Probe Button */}
                 <div className="pt-4 border-t border-gray-200 w-full">
                   <Button
+                    onClick={() => sendCommand("probe", 1)}
                     disabled={true}
                     size="lg"
                     className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white opacity-50"
                   >
-                    🔍 Probe (Coming Soon)
+                    🔍 Probe
                   </Button>
                 </div>
               </div>
