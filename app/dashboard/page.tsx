@@ -214,8 +214,215 @@ export default function Dashboard() {
             "heatmap-opacity": config.opacity as any,
           },
         });
+
+        // Add hover functionality for rover points
+        const popup = new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          maxWidth: "300px",
+          className: "rover-popup",
+        });
+
+        // Change cursor on hover
+        mapRef.current!.on("mouseenter", "rover-heatmap", () => {
+          mapRef.current!.getCanvas().style.cursor = "pointer";
+        });
+
+        mapRef.current!.on("mouseleave", "rover-heatmap", () => {
+          mapRef.current!.getCanvas().style.cursor = "";
+          popup.remove();
+        });
+
+        // Show popup on hover
+        mapRef.current!.on("mousemove", "rover-heatmap", (e) => {
+          if (e.features && e.features.length > 0) {
+            const feature = e.features[0];
+            const coordinates = (feature.geometry as Point).coordinates.slice();
+            const properties = feature.properties;
+
+            if (properties) {
+              // Create popup content with all data values
+              const popupContent = `
+                <div class="p-4 bg-white rounded-lg shadow-lg border border-gray-200">
+                  <div class="flex items-center justify-between mb-3 pb-2 border-b">
+                    <h3 class="font-semibold text-sm text-gray-800">Rover Data Point</h3>
+                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">${
+                      selectedSensor.charAt(0).toUpperCase() +
+                      selectedSensor.slice(1)
+                    }</span>
+                  </div>
+                  <div class="space-y-3 text-xs text-gray-700">
+                    <div class="grid grid-cols-2 gap-4">
+                      <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                          <span class="font-medium text-gray-600">Moisture:</span>
+                          <span class="text-blue-600 font-semibold">${
+                            properties.moisture !== null &&
+                            properties.moisture !== undefined
+                              ? properties.moisture + "%"
+                              : "N/A"
+                          }</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                          <span class="font-medium text-gray-600">Temperature:</span>
+                          <span class="text-red-600 font-semibold">${
+                            properties.temperature !== null &&
+                            properties.temperature !== undefined
+                              ? properties.temperature + "°C"
+                              : "N/A"
+                          }</span>
+                        </div>
+                      </div>
+                      <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                          <span class="font-medium text-gray-600">pH:</span>
+                          <span class="text-green-600 font-semibold">${
+                            properties.pH !== null &&
+                            properties.pH !== undefined
+                              ? properties.pH
+                              : "N/A"
+                          }</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                          <span class="font-medium text-gray-600">EC:</span>
+                          <span class="text-purple-600 font-semibold">${
+                            properties.EC !== null &&
+                            properties.EC !== undefined
+                              ? properties.EC + " dS/m"
+                              : "N/A"
+                          }</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="border-t pt-2 space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-600">Farm ID:</span>
+                        <span class="text-gray-800 font-mono text-xs">${
+                          properties.farm_id || "N/A"
+                        }</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-600">Timestamp:</span>
+                        <span class="text-gray-600 text-xs">${new Date(
+                          properties.created_at
+                        ).toLocaleString()}</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-600">Coordinates:</span>
+                        <span class="text-gray-600 font-mono text-xs">${coordinates[1].toFixed(
+                          6
+                        )}, ${coordinates[0].toFixed(6)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+
+              popup
+                .setLngLat(coordinates as [number, number])
+                .setHTML(popupContent)
+                .addTo(mapRef.current!);
+            }
+          }
+        });
+
+        // Also show popup on click for better mobile support
+        mapRef.current!.on("click", "rover-heatmap", (e) => {
+          if (e.features && e.features.length > 0) {
+            const feature = e.features[0];
+            const coordinates = (feature.geometry as Point).coordinates.slice();
+            const properties = feature.properties;
+
+            if (properties) {
+              const popupContent = `
+                <div class="p-4 bg-white rounded-lg shadow-lg border border-gray-200">
+                  <div class="flex items-center justify-between mb-3 pb-2 border-b">
+                    <h3 class="font-semibold text-sm text-gray-800">Rover Data Point</h3>
+                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">${
+                      selectedSensor.charAt(0).toUpperCase() +
+                      selectedSensor.slice(1)
+                    }</span>
+                  </div>
+                  <div class="space-y-3 text-xs text-gray-700">
+                    <div class="grid grid-cols-2 gap-4">
+                      <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                          <span class="font-medium text-gray-600">Moisture:</span>
+                          <span class="text-blue-600 font-semibold">${
+                            properties.moisture !== null &&
+                            properties.moisture !== undefined
+                              ? properties.moisture + "%"
+                              : "N/A"
+                          }</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                          <span class="font-medium text-gray-600">Temperature:</span>
+                          <span class="text-red-600 font-semibold">${
+                            properties.temperature !== null &&
+                            properties.temperature !== undefined
+                              ? properties.temperature + "°C"
+                              : "N/A"
+                          }</span>
+                        </div>
+                      </div>
+                      <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                          <span class="font-medium text-gray-600">pH:</span>
+                          <span class="text-green-600 font-semibold">${
+                            properties.pH !== null &&
+                            properties.pH !== undefined
+                              ? properties.pH
+                              : "N/A"
+                          }</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                          <span class="font-medium text-gray-600">EC:</span>
+                          <span class="text-purple-600 font-semibold">${
+                            properties.EC !== null &&
+                            properties.EC !== undefined
+                              ? properties.EC + " dS/m"
+                              : "N/A"
+                          }</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="border-t pt-2 space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-600">Farm ID:</span>
+                        <span class="text-gray-800 font-mono text-xs">${
+                          properties.farm_id || "N/A"
+                        }</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-600">Timestamp:</span>
+                        <span class="text-gray-600 text-xs">${new Date(
+                          properties.created_at
+                        ).toLocaleString()}</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-600">Coordinates:</span>
+                        <span class="text-gray-600 font-mono text-xs">${coordinates[1].toFixed(
+                          6
+                        )}, ${coordinates[0].toFixed(6)}</span>
+                      </div>
+                    </div>
+                  </div>
+                `;
+
+              popup
+                .setLngLat(coordinates as [number, number])
+                .setHTML(popupContent)
+                .addTo(mapRef.current!);
+            }
+          }
+        });
+
+        // Add click event for general map clicks (to close popup when clicking elsewhere)
         mapRef.current!.on("click", (e) => {
-          console.log("Clicked location:", e.lngLat);
+          // Only close popup if not clicking on a rover point
+          if (!e.features || e.features.length === 0) {
+            popup.remove();
+          }
         });
       });
     }

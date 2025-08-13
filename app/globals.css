@@ -121,3 +121,30 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom Mapbox Popup Styles */
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: #e5e7eb !important;
+}
+
+.rover-popup .mapboxgl-popup-content {
+  background: white !important;
+  color: #374151 !important;
+}
+
+/* Sensor badge styling */
+.rover-popup .bg-blue-100 {
+  background-color: #dbeafe !important;
+}
+
+.rover-popup .text-blue-800 {
+  color: #1e40af !important;
+}
