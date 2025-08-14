@@ -48,11 +48,14 @@ import {
 
 // Types & data utilities
 import { ChemicalEstimate } from "@/lib/types";
-import { supabase } from "@/lib/supabaseClient";
+// NOTE: Supabase import removed.
 import { heatmapConfigs } from "@/components/heatmapConfig";
 import type { FeatureCollection, Feature, Point } from "geojson";
 import ChemicalAnalysisDialog from "@/components/ChemicalAnalysisDialog";
 import AIAnalysisBox from "@/components/AIAnalysisBox";
+
+const MACRONUTRIENT_API_URL = "https://groundhog123-groundhog.hf.space/run/predict";
+const MICRONUTRIENT_API_URL = "https://groundhog1234-groundhog.hf.space/run/predict";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -110,35 +113,64 @@ export default function Dashboard() {
     };
   };
 
-  // Function to fetch chemical data
-  const getChemicalData = async (): Promise<void> => {
-    if (!farmID) {
-      console.log("No farm ID found");
+  // --- START: NEW FUNCTION TO FETCH DATA FROM HUGGING FACE MODELS ---
+  const fetchModelData = async (): Promise<void> => {
+    if (!roverPoints || roverPoints.length === 0) {
+      console.log("No rover points available to fetch model data.");
+      setChemicalData(null);
       return;
     }
+    const { ec, ph } = calculateRoverAverages();
+    const currentDate = new Date().toISOString();
 
-    let { data: chemicalData, error } = await supabase
-      .from("chemical-estimate")
-      .select("*")
-      .eq("farm_id", farmID)
-      .order("created_at", { ascending: false });
+    try {
+      // Fetch macronutrients
+      const macroResponse = await fetch(MACRONUTRIENT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: [ec, ph] }),
+      });
+      const macroResult = await macroResponse.json();
+      const [nitrogen, phosphorus, potassium] = macroResult.data[0];
 
-    console.log("Chemical data:", chemicalData);
-    setChemicalData(
-      chemicalData && chemicalData.length > 0 ? chemicalData[0] : null
-    );
+      // Fetch micronutrients
+      const microResponse = await fetch(MICRONUTRIENT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: [ec, ph] }),
+      });
+      const microResult = await microResponse.json();
+      const [boron, copper, iron, zinc] = microResult.data[0];
+
+      // Create the ChemicalEstimate object
+      const newChemicalData: ChemicalEstimate = {
+        farm_id: farmID,
+        created_at: currentDate,
+        ec,
+        ph,
+        nitrogen,
+        phosphorus,
+        potassium,
+        boron,
+        copper,
+        iron,
+        zinc,
+        sulphur: 0, // Assuming sulphur is not provided by the model
+      };
+      setChemicalData(newChemicalData);
+      console.log("Fetched chemical data from models:", newChemicalData);
+    } catch (error) {
+      console.error("Error fetching chemical data from models:", error);
+      setChemicalData(null);
+    }
   };
-
-  // Fetch recent soil chemical analysis
-  useEffect(() => {
-    getChemicalData();
-  }, [farmID]);
+  // --- END: NEW FUNCTION TO FETCH DATA FROM HUGGING FACE MODELS ---
 
   // Function to handle analysis completion and refresh data
   const handleAnalysisComplete = () => {
-    console.log("Analysis completed");
-    // Refresh chemical data to show latest analysis
-    getChemicalData();
+    console.log("Analysis completed. Refreshing data...");
+    // Refresh data using the new model fetching function
+    fetchModelData();
   };
 
   // Set farm ID from cookie
@@ -153,6 +185,7 @@ export default function Dashboard() {
 
     console.log("Using farm ID:", farmID);
     async function getFarmData(): Promise<void> {
+      // NOTE: This part still uses supabase, as farm data is not from the model.
       let { data: farmData, error } = await supabase
         .from("farm-data")
         .select("*")
@@ -175,6 +208,7 @@ export default function Dashboard() {
     }
 
     async function fetchRoverPoints() {
+      // NOTE: This part still uses supabase, as rover data is not from the model.
       let { data: roverpoints, error } = await supabase
         .from("rover-points")
         .select("*")
@@ -185,6 +219,12 @@ export default function Dashboard() {
     }
     fetchRoverPoints();
   }, [selectedSensor, farmID]);
+
+  // --- START: UPDATED useEffect FOR FETCHING MODEL DATA ---
+  useEffect(() => {
+    fetchModelData();
+  }, [farmID, roverPoints]); // Re-run when farmID or roverPoints change
+  // --- END: UPDATED useEffect FOR FETCHING MODEL DATA ---
 
   // Update map and heatmap layer
   useEffect(() => {
@@ -454,7 +494,8 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
-                `;
+                </div>
+              `;
 
               popup
                 .setLngLat(coordinates as [number, number])
@@ -775,6 +816,7 @@ export default function Dashboard() {
                   variant="outline"
                   onClick={async () => {
                     setRoverPointsDebug("Fetching...");
+                    // NOTE: This part still uses supabase, as rover data is not from the model.
                     let { data: roverpoints, error } = await supabase
                       .from("rover-points")
                       .select("*")
@@ -815,19 +857,15 @@ export default function Dashboard() {
               </Button>
 
               {/* Sensor Dropdown */}
-              <Select value={selectedSensor} onValueChange={setSelectedSensor}>
-                <SelectTrigger
-                  className={`${
-                    largeMap === "w-4/5" ? "w-12" : "w-[200px]"
-                  } bg-white transition-all duration-200`}
-                >
-                  {largeMap === "w-4/5" ? (
-                    <div className="flex items-center justify-center">
-                      <Sprout className="h-4 w-4" />
-                    </div>
-                  ) : (
-                    <SelectValue placeholder="Sensor Map Display" />
-                  )}
+              <Select
+                value={selectedSensor}
+                onValueChange={(value) => setSelectedSensor(value)}
+              >
+                <SelectTrigger className="w-[180px] bg-white">
+                  <Sprout className="h-4 w-4" />
+                  <span className="ml-2">
+                    <SelectValue placeholder="Select Sensor" />
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="moisture">Moisture</SelectItem>
@@ -839,41 +877,14 @@ export default function Dashboard() {
 
               {/* Map Style Dropdown */}
               <Select value={mapStyle} onValueChange={setMapStyle}>
-                <SelectTrigger
-                  className={`${
-                    largeMap === "w-4/5" ? "w-12" : "w-[200px]"
-                  } bg-white transition-all duration-200`}
-                >
-                  {largeMap === "w-4/5" ? (
-                    <div className="flex items-center justify-center">
-                      <Globe className="h-4 w-4" />
-                    </div>
-                  ) : (
+                <SelectTrigger className="w-[180px] bg-white">
+                  <Globe className="h-4 w-4" />
+                  <span className="ml-2">
                     <SelectValue placeholder="Map Style" />
-                  )}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="standard-satellite">Satellite</SelectItem>
-                  <SelectItem value="outdoors-v12">Street</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Navigation Button */}
-              <Button
-                variant={"outline"}
-                onClick={() => router.push("/waypoints")}
-                title="Waypoints"
-                className={largeMap === "w-4/5" ? "px-2" : ""}
-              >
-                <Navigation className="h-4 w-4" />
-                {largeMap === "w-4/5" ? null : (
-                  <span className="ml-2">Waypoints</span>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+                  <SelectItem value="satellite-streets-v12">Satellite</SelectItem>
+                  <SelectItem value="streets-v12">Streets</SelectItem>
+                  <SelectItem value="light-v11">Light</SelectItem>
+                  <SelectItem value="dark
