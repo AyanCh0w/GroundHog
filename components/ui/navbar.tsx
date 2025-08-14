@@ -55,7 +55,7 @@ export function Navbar() {
             transition={{ delay: 0.2, duration: 0.5 }}
           >
             <img
-              src="https://img.freepik.com/premium-vector/groundhog-logo-design-vector-illustration_685330-1069.jpg?w=360"
+              src="/groundhog.png"
               alt="Groundhog Logo"
               className="w-8 h-8 object-contain"
             />
@@ -77,7 +77,7 @@ export function Navbar() {
               <Link href="/demo">
                 <Button
                   variant="outline"
-                  className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-all duration-200"
+                  className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-200"
                 >
                   Demo
                 </Button>
@@ -95,7 +95,7 @@ export function Navbar() {
               <Link href="/login">
                 <Button
                   variant="outline"
-                  className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-all duration-200"
+                  className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-200"
                 >
                   Login
                 </Button>

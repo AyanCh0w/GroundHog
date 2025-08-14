@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Navbar } from "@/components/ui/navbar";
 
 export default function Home() {
@@ -167,7 +165,7 @@ specific locations in their field.`;
             transition={{ delay: 0.3, duration: 0.8 }}
           >
             <motion.img
-              src="https://img.freepik.com/premium-vector/groundhog-logo-design-vector-illustration_685330-1069.jpg?w=360"
+              src="/groundhog.png"
               alt="Groundhog Logo"
               className="w-48 h-48 md:w-64 md:h-64 object-contain"
               initial={{ scale: 0, rotate: -180 }}
