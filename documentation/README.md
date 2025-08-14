@@ -62,12 +62,6 @@ For immediate setup, follow these steps:
 3. **Configure**: Set up environment variables (see [Configuration](./CONFIGURATION.md))
 4. **Run**: Execute `npm run dev` to start development server
 
-## 📞 Support
-
-- **Email**: ntiglao@umd.edu
-- **Documentation Issues**: Create an issue in the repository
-- **Technical Support**: Check the [Troubleshooting](./TROUBLESHOOTING.md) guide first
-
 ## 🔄 Contributing
 
 We welcome contributions! Please see our contributing guidelines and ensure all documentation is kept up to date with code changes.
