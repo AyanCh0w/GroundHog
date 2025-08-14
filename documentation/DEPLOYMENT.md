@@ -927,13 +927,4 @@ curl -f https://your-domain.com/api/config
    - Check bundle size
    - Optimize images and assets
 
-### Getting Help
-
-- **Platform Documentation**: Check Vercel, Netlify, or Docker docs
-- **Next.js Documentation**: Official deployment guides
-- **Support Contact**: ntiglao@umd.edu
-- **Community**: GitHub discussions and Stack Overflow
-
----
-
 **Deployment guide completed!** This provides comprehensive instructions for deploying GroundHog Frontend to production. 🚀

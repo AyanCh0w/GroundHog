@@ -7,17 +7,16 @@ This document provides comprehensive information about the database architecture
 **GroundHog Frontend** uses **Supabase** as its primary database service, which is built on top of **PostgreSQL**. The system is designed to handle real-time soil monitoring data, farm management, and AI-powered analysis for precision agriculture.
 
 ### Database Technology Stack
+
 - **Primary Database**: PostgreSQL (via Supabase)
 - **Real-time Features**: Supabase Realtime
-- **Authentication**: Supabase Auth
-- **Storage**: Supabase Storage (for future file uploads)
-- **Edge Functions**: Supabase Edge Functions (for future serverless operations)
 
 ## 🏗️ Database Schema
 
 ### Core Tables
 
 #### 1. `farm_location` - Farm Management
+
 **Purpose**: Stores basic farm information and location data
 
 ```sql
@@ -32,12 +31,14 @@ CREATE TABLE farm_location (
 );
 ```
 
-**Data Flow**: 
+**Data Flow**:
+
 - Created during farm onboarding process
 - Referenced by all other tables for data isolation
 - Used for map visualization and farm selection
 
 **Sample Data**:
+
 ```json
 {
   "id": 1,
@@ -51,6 +52,7 @@ CREATE TABLE farm_location (
 ```
 
 #### 2. `chemical_estimate` - Soil Analysis
+
 **Purpose**: Stores detailed soil nutrient analysis and chemical properties
 
 ```sql
@@ -58,17 +60,17 @@ CREATE TABLE chemical_estimate (
   id SERIAL PRIMARY KEY,
   farmID TEXT NOT NULL REFERENCES farm_location(farm_id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  
+
   -- Macronutrients (Kg/Ha)
   nitrogen DOUBLE PRECISION,              -- Nitrogen content
   phosphorus DOUBLE PRECISION,            -- Phosphorus content
   potassium DOUBLE PRECISION,             -- Potassium content
-  
+
   -- Soil Properties
   ec DOUBLE PRECISION,                    -- Electrical Conductivity
   sulphur DOUBLE PRECISION,               -- Sulphur content
   ph DOUBLE PRECISION,                    -- pH level
-  
+
   -- Micronutrients (PPM)
   zinc DOUBLE PRECISION,                  -- Zinc content
   iron DOUBLE PRECISION,                  -- Iron content
@@ -78,11 +80,13 @@ CREATE TABLE chemical_estimate (
 ```
 
 **Data Flow**:
+
 - Populated by AI analysis of sensor data
 - Used for chemical analysis dashboard
 - Historical tracking of soil health trends
 
 **Sample Data**:
+
 ```json
 {
   "id": 1,
@@ -102,6 +106,7 @@ CREATE TABLE chemical_estimate (
 ```
 
 #### 3. `rover_points` - Sensor Data
+
 **Purpose**: Stores real-time sensor readings from the autonomous rover
 
 ```sql
@@ -109,13 +114,13 @@ CREATE TABLE rover_points (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   farm_id TEXT NOT NULL REFERENCES farm_location(farm_id),
-  
+
   -- Sensor Readings
   moisture DOUBLE PRECISION,              -- Moisture percentage
   temperature DOUBLE PRECISION,           -- Temperature in Celsius
   pH DOUBLE PRECISION,                    -- pH level
   EC DOUBLE PRECISION,                    -- Electrical Conductivity
-  
+
   -- Location
   lat DOUBLE PRECISION NOT NULL,          -- Latitude coordinate
   long DOUBLE PRECISION NOT NULL          -- Longitude coordinate
@@ -123,11 +128,13 @@ CREATE TABLE rover_points (
 ```
 
 **Data Flow**:
+
 - Real-time data from rover sensors
 - Used for heatmap visualization
 - Historical analysis and trend detection
 
 **Sample Data**:
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -143,6 +150,7 @@ CREATE TABLE rover_points (
 ```
 
 #### 4. `waypoints` - Navigation Points
+
 **Purpose**: Defines navigation points for autonomous rover movement
 
 ```sql
@@ -158,11 +166,13 @@ CREATE TABLE waypoints (
 ```
 
 **Data Flow**:
+
 - Created during farm setup
 - Used for rover navigation planning
 - Supports multiple waypoint sequences
 
 **Sample Data**:
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440001",
@@ -176,6 +186,7 @@ CREATE TABLE waypoints (
 ```
 
 #### 5. `waypoint_paths` - Navigation Routes
+
 **Purpose**: Groups waypoints into navigable paths for the rover
 
 ```sql
@@ -190,11 +201,13 @@ CREATE TABLE waypoint_paths (
 ```
 
 **Data Flow**:
+
 - Manages multiple navigation paths per farm
 - Supports path activation/deactivation
 - Used for rover route planning
 
 #### 6. `ai_analysis_records` - AI Analysis History
+
 **Purpose**: Stores AI-generated soil analysis and recommendations
 
 ```sql
@@ -209,11 +222,13 @@ CREATE TABLE ai_analysis_records (
 ```
 
 **Data Flow**:
+
 - Stores AI analysis inputs and outputs
 - Historical tracking of recommendations
 - Supports analysis improvement over time
 
 **Sample Data**:
+
 ```json
 {
   "id": 1,
@@ -258,24 +273,24 @@ farm_location (1) ←→ (N) chemical_estimate
 
 ```sql
 -- All tables reference farm_location.farm_id
-ALTER TABLE chemical_estimate 
-  ADD CONSTRAINT fk_chemical_estimate_farm 
+ALTER TABLE chemical_estimate
+  ADD CONSTRAINT fk_chemical_estimate_farm
   FOREIGN KEY (farmID) REFERENCES farm_location(farm_id);
 
-ALTER TABLE rover_points 
-  ADD CONSTRAINT fk_rover_points_farm 
+ALTER TABLE rover_points
+  ADD CONSTRAINT fk_rover_points_farm
   FOREIGN KEY (farm_id) REFERENCES farm_location(farm_id);
 
-ALTER TABLE waypoints 
-  ADD CONSTRAINT fk_waypoints_farm 
+ALTER TABLE waypoints
+  ADD CONSTRAINT fk_waypoints_farm
   FOREIGN KEY (farm_id) REFERENCES farm_location(farm_id);
 
-ALTER TABLE waypoint_paths 
-  ADD CONSTRAINT fk_waypoint_paths_farm 
+ALTER TABLE waypoint_paths
+  ADD CONSTRAINT fk_waypoint_paths_farm
   FOREIGN KEY (farm_id) REFERENCES farm_location(farm_id);
 
-ALTER TABLE ai_analysis_records 
-  ADD CONSTRAINT fk_ai_analysis_farm 
+ALTER TABLE ai_analysis_records
+  ADD CONSTRAINT fk_ai_analysis_farm
   FOREIGN KEY (farm_id) REFERENCES farm_location(farm_id);
 ```
 
@@ -322,16 +337,16 @@ CREATE POLICY "Users can insert their own farm data" ON farm_location
 
 ```sql
 -- Example constraints for data validation
-ALTER TABLE rover_points 
-  ADD CONSTRAINT chk_moisture_range 
+ALTER TABLE rover_points
+  ADD CONSTRAINT chk_moisture_range
   CHECK (moisture >= 0 AND moisture <= 100);
 
-ALTER TABLE rover_points 
-  ADD CONSTRAINT chk_temperature_range 
+ALTER TABLE rover_points
+  ADD CONSTRAINT chk_temperature_range
   CHECK (temperature >= -50 AND temperature <= 100);
 
-ALTER TABLE rover_points 
-  ADD CONSTRAINT chk_ph_range 
+ALTER TABLE rover_points
+  ADD CONSTRAINT chk_ph_range
   CHECK (pH >= 0 AND pH <= 14);
 ```
 
@@ -386,12 +401,13 @@ The system leverages Supabase Realtime for live data updates:
 ```typescript
 // Subscribe to real-time updates
 const subscription = supabase
-  .channel('rover_updates')
-  .on('postgres_changes', 
-    { event: 'INSERT', schema: 'public', table: 'rover_points' },
+  .channel("rover_updates")
+  .on(
+    "postgres_changes",
+    { event: "INSERT", schema: "public", table: "rover_points" },
     (payload) => {
       // Handle real-time sensor data
-      console.log('New sensor reading:', payload.new);
+      console.log("New sensor reading:", payload.new);
     }
   )
   .subscribe();
@@ -423,25 +439,25 @@ const subscription = supabase
 
 ```sql
 -- Get latest sensor data for a farm
-SELECT * FROM rover_points 
-WHERE farm_id = 'FARM_001' 
-ORDER BY created_at DESC 
+SELECT * FROM rover_points
+WHERE farm_id = 'FARM_001'
+ORDER BY created_at DESC
 LIMIT 100;
 
 -- Get chemical analysis history
-SELECT * FROM chemical_estimate 
-WHERE farmID = 'FARM_001' 
+SELECT * FROM chemical_estimate
+WHERE farmID = 'FARM_001'
 ORDER BY created_at DESC;
 
 -- Get waypoints for navigation
-SELECT * FROM waypoints 
-WHERE farm_id = 'FARM_001' 
+SELECT * FROM waypoints
+WHERE farm_id = 'FARM_001'
 ORDER BY order_index;
 
 -- Get AI analysis recommendations
-SELECT output_data->>'todos' as recommendations 
-FROM ai_analysis_records 
-WHERE farm_id = 'FARM_001' 
+SELECT output_data->>'todos' as recommendations
+FROM ai_analysis_records
+WHERE farm_id = 'FARM_001'
 ORDER BY created_at DESC;
 ```
 
@@ -450,11 +466,13 @@ ORDER BY created_at DESC;
 ### Common Database Issues
 
 1. **Connection Timeouts**:
+
    - Check network connectivity
    - Verify Supabase credentials
    - Monitor connection pool usage
 
 2. **Performance Issues**:
+
    - Review query execution plans
    - Check index usage
    - Monitor slow query logs
@@ -464,16 +482,4 @@ ORDER BY created_at DESC;
    - Check RLS policies
    - Validate data types
 
-## 📞 Support
-
-For database-related issues:
-
-- **Supabase Dashboard**: Check project status and logs
-- **Documentation**: Review Supabase documentation
-- **Contact**: ntiglao@umd.edu
-
----
-
 **Database setup completed?** Your GroundHog system is ready to store and analyze soil data! 🌱
-
-
