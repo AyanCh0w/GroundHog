@@ -52,12 +52,6 @@ The comprehensive documentation includes:
 - **AI**: OpenAI integration
 - **Real-time**: Supabase Realtime
 
-## 📞 Support
-
-- **Email**: ntiglao@umd.edu
-- **Documentation**: [Complete docs](./documentation/README.md)
-- **Issues**: GitHub repository
-
 ---
 
 **GroundHog**: Know Your Soil, Grow Your Future 🌱
