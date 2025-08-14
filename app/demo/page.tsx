@@ -362,7 +362,7 @@ export default function DemoPage() {
 
       <div className="w-full h-full space-y-4">
         {/* Two-column layout: Left navigation and info, Right stacked graphs */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
           {/* Left Side - Controls, then Connection + Heading */}
           <div className="flex flex-col space-y-3 h-full">
             {/* Rover Controls */}
@@ -499,8 +499,8 @@ export default function DemoPage() {
 
           {/* Right Side - Time Series (top) + Dashboard charts (below) */}
           <div className="space-y-3">
-            {/* Time Series Graphs in 2x2 grid */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* Time Series Graphs in 2x2 grid - Fixed layout */}
+            <div className="grid grid-cols-2 gap-3 min-w-0">
               <Card className="py-2">
                 <CardHeader className="px-3 pb-2">
                   <CardTitle className="flex items-center gap-2 text-gray-900 text-xs">
