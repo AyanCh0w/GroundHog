@@ -5,12 +5,14 @@ This guide provides complete step-by-step instructions for setting up and runnin
 ## 🎯 Prerequisites
 
 ### Required Software
+
 - **Node.js**: Version 18.0.0 or higher
 - **npm**: Version 8.0.0 or higher (comes with Node.js)
 - **Git**: For cloning the repository
 - **Code Editor**: VS Code recommended (with TypeScript support)
 
 ### Required Accounts & API Keys
+
 - **Mapbox Account**: For map services
 - **Supabase Account**: For database services
 - **OpenAI Account**: For AI analysis features
@@ -20,6 +22,7 @@ This guide provides complete step-by-step instructions for setting up and runnin
 ### 1. Environment Setup
 
 #### Install Node.js
+
 ```bash
 # macOS (using Homebrew)
 brew install node
@@ -37,6 +40,7 @@ npm --version   # Should show 8.x.x or higher
 ```
 
 #### Install Git
+
 ```bash
 # macOS
 brew install git
@@ -51,6 +55,7 @@ sudo apt-get install git
 ### 2. Project Setup
 
 #### Clone Repository
+
 ```bash
 # Navigate to your desired development directory
 cd /Users/yourusername/Documents/GitHub
@@ -64,6 +69,7 @@ ls -la
 ```
 
 **Expected Directory Structure:**
+
 ```
 groundhog-frontend/
 ├── app/                    # Next.js app directory
@@ -76,6 +82,7 @@ groundhog-frontend/
 ```
 
 #### Install Dependencies
+
 ```bash
 # Install all required packages
 npm install
@@ -87,12 +94,14 @@ npm list --depth=0
 ### 3. Environment Configuration
 
 #### Create Environment File
+
 ```bash
 # Create .env.local file in the root directory
 touch .env.local
 ```
 
 #### Configure Environment Variables
+
 Edit `.env.local` with the following content:
 
 ```env
@@ -111,12 +120,14 @@ NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key_here
 **How to obtain these keys:**
 
 1. **Mapbox API Key**:
+
    - Go to [Mapbox](https://account.mapbox.com/)
    - Create account or sign in
    - Navigate to Access Tokens
    - Create a new token with appropriate permissions
 
 2. **Supabase Keys**:
+
    - Go to [Supabase](https://supabase.com/)
    - Create account or sign in
    - Create a new project
@@ -132,6 +143,7 @@ NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key_here
 ### 4. Database Setup
 
 #### Supabase Project Configuration
+
 1. **Create Tables**: Execute the following SQL in your Supabase SQL editor:
 
 ```sql
@@ -209,6 +221,7 @@ CREATE TABLE ai_analysis_records (
 ```
 
 2. **Set Row Level Security (RLS)**:
+
 ```sql
 -- Enable RLS on all tables
 ALTER TABLE farm_location ENABLE ROW LEVEL SECURITY;
@@ -229,6 +242,7 @@ CREATE POLICY "Users can insert their own farm data" ON farm_location
 ### 5. Development Server Setup
 
 #### Start Development Server
+
 ```bash
 # Start the development server
 npm run dev
@@ -238,6 +252,7 @@ npm run dev -- -p 3001
 ```
 
 #### Verify Installation
+
 1. **Open Browser**: Navigate to `http://localhost:3000`
 2. **Check Console**: Open browser dev tools and verify no errors
 3. **Test Pages**: Navigate through different pages to ensure they load
@@ -245,6 +260,7 @@ npm run dev -- -p 3001
 ### 6. Build and Production Setup
 
 #### Build for Production
+
 ```bash
 # Create production build
 npm run build
@@ -254,7 +270,9 @@ npm start
 ```
 
 #### Production Environment
+
 For production deployment, ensure:
+
 - All environment variables are properly set
 - Database connections are configured for production
 - SSL certificates are in place
@@ -264,23 +282,25 @@ For production deployment, ensure:
 
 ### File Locations and Purposes
 
-| File | Location | Purpose |
-|------|----------|---------|
-| `package.json` | `/Users/yourusername/Documents/GitHub/groundhog-frontend/` | Dependencies and scripts |
-| `.env.local` | `/Users/yourusername/Documents/GitHub/groundhog-frontend/` | Environment variables |
-| `tsconfig.json` | `/Users/yourusername/Documents/GitHub/groundhog-frontend/` | TypeScript configuration |
-| `next.config.ts` | `/Users/yourusername/Documents/GitHub/groundhog-frontend/` | Next.js configuration |
+| File                 | Location                                                   | Purpose                    |
+| -------------------- | ---------------------------------------------------------- | -------------------------- |
+| `package.json`       | `/Users/yourusername/Documents/GitHub/groundhog-frontend/` | Dependencies and scripts   |
+| `.env.local`         | `/Users/yourusername/Documents/GitHub/groundhog-frontend/` | Environment variables      |
+| `tsconfig.json`      | `/Users/yourusername/Documents/GitHub/groundhog-frontend/` | TypeScript configuration   |
+| `next.config.ts`     | `/Users/yourusername/Documents/GitHub/groundhog-frontend/` | Next.js configuration      |
 | `tailwind.config.js` | `/Users/yourusername/Documents/GitHub/groundhog-frontend/` | Tailwind CSS configuration |
 
 ### Key Configuration Settings
 
 #### TypeScript Configuration (`tsconfig.json`)
+
 - Target: ES2017
 - Module: ESNext
 - JSX: Preserve
 - Path mapping: `@/*` → `./*`
 
 #### Next.js Configuration (`next.config.ts`)
+
 - Basic configuration with room for custom settings
 - Turbopack enabled for development
 
@@ -289,17 +309,20 @@ For production deployment, ensure:
 ### Common Issues
 
 1. **Port Already in Use**:
+
    ```bash
    # Kill process on port 3000
    lsof -ti:3000 | xargs kill -9
    ```
 
 2. **Environment Variables Not Loading**:
+
    - Ensure `.env.local` is in the root directory
    - Restart the development server
    - Check variable names match exactly
 
 3. **Database Connection Issues**:
+
    - Verify Supabase URL and keys
    - Check network connectivity
    - Verify table permissions
@@ -341,6 +364,7 @@ echo $NEXT_PUBLIC_MAPBOX_KEY
 - [ ] Production server starts without errors
 
 ### Automated Testing
+
 ```bash
 # Run linting
 npm run lint
@@ -361,17 +385,6 @@ After successful setup:
 3. **Check [API Documentation](./API.md)** for external integrations
 4. **Follow [Deployment Guide](./DEPLOYMENT.md)** for production setup
 
-## 📞 Support
-
-If you encounter issues during setup:
-
-1. **Check this documentation** for common solutions
-2. **Review the [Troubleshooting Guide](./TROUBLESHOOTING.md)**
-3. **Contact**: ntiglao@umd.edu
-4. **Create an issue** in the repository
-
 ---
 
 **Setup completed successfully?** Great! You're ready to start developing with GroundHog Frontend. 🎉
-
-

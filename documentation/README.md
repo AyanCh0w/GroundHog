@@ -64,7 +64,6 @@ For immediate setup, follow these steps:
 
 ## 📞 Support
 
-- **Email**: ntiglao@umd.edu
 - **Documentation Issues**: Create an issue in the repository
 - **Technical Support**: Check the [Troubleshooting](./TROUBLESHOOTING.md) guide first
 
