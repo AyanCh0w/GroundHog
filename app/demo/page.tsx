@@ -357,26 +357,26 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-4">
       {/* Header */}
 
-      <div className="w-full h-full space-y-4">
+      <div className="w-full space-y-4">
         {/* Two-column layout: Left navigation and info, Right stacked graphs */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Left Side - Controls, then Connection + Heading */}
-          <div className="flex flex-col space-y-3 h-full">
+          <div className="flex flex-col space-y-3">
             {/* Rover Controls */}
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold">Groundhog</h1>
             </div>
-            <Card className="py-3 flex-1">
+            <Card className="py-3">
               <CardHeader className="px-4">
                 <CardTitle className="text-gray-900 text-sm">
                   Rover Controls
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-4 h-full">
-                <div className="h-full flex flex-col items-center justify-center space-y-6">
+              <CardContent className="px-4">
+                <div className="flex flex-col items-center justify-center space-y-6">
                   <Button
                     onClick={() => sendCommand("drive", 1)}
                     disabled={mqttStatus !== "connected"}
